@@ -13,27 +13,30 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
-    <style>
-        #map { position: absolute;
-                bottom: 2%;
-                right: 1%;
-                height: 80vh;
-                width: 98vw;
-                z-index: 1;
-                
-                border-radius: 20px;
-                overflow: hidden;
-                box-shadow: 0 0 10px rgba(0,0,0,0.5);
-                background-color: rgba(0, 0, 0, 0.2);
-                }
-        body {
-                background-color: rgb(18, 24, 32);
-            }        
-    </style>   
+
+    <link rel="stylesheet" href="style.css">  
 
 </head>
 
 <body>
+    <nav>
+        <div class="lasso">
+            <div class="lasso-text">
+              Search
+            </div>
+            <div class="lasso-wrap">
+              <div class="lasso-triangle">
+              </div>
+              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="58px" height="58px" viewBox="0 0 16 16" preserveAspectRatio="none">
+                <circle cx="8" cy="8" r="6.215" transform="rotate(90 8 8)"></circle>
+                <image href="https://uxwing.com/wp-content/themes/uxwing/download/user-interface/search-icon.svg" x="5.2" y="5.5" width="6" height="6", fill="#de7813" />
+              </svg>
+             </div>
+            <div class="lasso-border">
+            </div>
+          </div>
+          
+    </nav>
     <div id="map"></div>
 </body>
 
@@ -45,10 +48,61 @@
         attributionControl: false
     });
 
-    //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxZoom: 19,
     }).addTo(map);
 
+    const pin_icon = L.icon({
+        iconUrl: './assets/pin-3.svg',
+        iconSize: [40, 40],
+    });
+
+    let pins = [];
+
+    map.on("click", function(e){
+        const pinDescription = `
+            <div class="popup-from">
+                <textarea id="pin-description" placeholder="Enter description here"></textarea><br>
+                <button id="pin-submit-button">Submit</button>
+            </div>    
+        `;
+
+        var temp_pin = new L.marker(
+            [e.latlng.lat, e.latlng.lng],{
+                icon: pin_icon,}
+        ).addTo(map)
+        .bindPopup(pinDescription)
+        .openPopup();
+
+        const submitButton= document.getElementById('pin-submit-button');
+            if (submitButton){
+                submitButton.onclick = function() {
+                const pin_description = document.getElementById('pin-description').value;
+                
+                if (pin_description.trim() === ''){
+                    alert('Description cannot be empty!');
+                    return;
+                }
+                temp_pin.closePop();
+
+                const new_pin = new L.marker(
+                    [e.latlng.lat, e.latlng.lng],{
+                        icon: pin_icon,
+                        title: pin_description,
+                        clickable: true,
+                    }).addTo(map)
+                    .bindPopup(pin_description)
+                    .on('mouseover', function(){
+                        new_pin.openPopup();
+                    }) 
+                    .on('mouseout', function() {
+                        this.closePopup();
+                    });
+
+                    pins.push(new_pin);
+                    document.getElementById('pin-description').value = '';
+            };
+        }    
+    });
 </script>    
 </html>

@@ -1,0 +1,138 @@
+:root{
+    --gold-color: rgba(216,121,31,255);
+    --bgr-color: rgb(37, 47, 59);
+}
+body {
+    font-family: "Roboto", sans-serif;
+    background-color: var(--bgr-color);
+
+  }
+  #map { position: absolute;
+    bottom: 2%;
+    right: 1%;
+    height: 80vh;
+    width: 98vw;
+    z-index: 1;
+    
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.2);
+    }
+
+nav {
+    width: 95vw;
+    height: 13vh;
+    padding: 10px 20px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.268);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: fixed;
+    top: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+}       
+
+body {
+    font-family: "Roboto", sans-serif;
+  }
+  
+  .lasso {
+    position: absolute;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+    right: 6%;
+    margin: auto;
+    width: 150px;
+    height: 52px;
+  }
+  
+  .lasso-text {
+    position: absolute;
+    left: 0;
+    bottom: 10px;
+    font-size: 28px;
+    letter-spacing: 3px;
+    line-height: 1.1;
+    text-align: left;
+    color: #000;
+  }
+  
+  .lasso-border {
+    height: 2px;
+    background: var(--gold-color);
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    right: 0;
+    -webkit-transition: left 0.5s;
+    -webkit-transition: left 0.5s, background .1s;
+    -o-transition: left 0.5s, background .1s;
+    transition: left 0.5s, background .1s;
+  }
+  
+  .lasso-wrap {
+    float: right;
+    width: 58px;
+    position: relative;
+    height: 58px;
+    margin-right: -25px;
+  }
+  
+  .lasso-triangle {
+    position: absolute;
+    height: 10px;
+    left: 0;
+    right: -2px;
+    margin: auto;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+            transform: translateY(-50%);
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0px;
+    border-color: transparent transparent transparent var(--gold-color);
+    z-index: 999;
+  }
+  
+  .lasso-wrap svg {
+    z-index: 10;
+  }
+  
+  .lasso-wrap svg circle {
+    fill: none;
+    stroke: var(--gold-color);
+    stroke-width: .5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 39 39;
+    stroke-dashoffset: -39;
+    -webkit-transition: stroke-dashoffset 0.5s;
+    -o-transition: stroke-dashoffset 0.5s;
+    transition: stroke-dashoffset 0.5s;
+  }
+  
+  .lasso:hover .lasso-border {
+    left: 100%;
+    right: 0px;
+    background: var(--gold-color);
+  }
+  
+  .lasso:hover .lasso-wrap svg circle {
+    stroke-dashoffset: 0;
+    -webkit-transition: stroke-dashoffset 0.5s;
+    -o-transition: stroke-dashoffset 0.5s;
+    transition: stroke-dashoffset 0.5s;
+    stroke: var(--gold-color);
+  }
