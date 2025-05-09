@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
+    <title>Map Stories</title>
+    <!-- Include leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+    <style>
+        #map { position: absolute;
+                bottom: 2%;
+                right: 1%;
+                height: 70vh;
+                width: 60vw;
+                z-index: 1;
+                
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                background-color: rgba(0, 0, 0, 0.2);
+                }
+        body {
+                background-color: rgb(18, 24, 32);
+            }        
+    </style>   
+
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+<script>
+    var map = L.map('map', {
+        center: [50.065870, 19.934727],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: false
+    });
+
+    //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+</script>    
+</html>
