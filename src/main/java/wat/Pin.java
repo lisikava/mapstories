@@ -6,25 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.postgresql.geometric.PGpoint;
+import org.postgresql.util.PGobject;
 
 public class Pin {
 
     private static final DataSource dataSource =
         DataSourceProvider.getDataSource();
 
-    private static final String createQuery = """
+    private static final String createQuery =
+        """
         insert into pins(location, category, tags)
         values (?, ?, ?)
         returning id, create_time""";
-
-    private static String mapToHStore(Map<String, String> map) {
-        return map.entrySet().stream()
-            .map(tag -> String.format("%1s=>\"%2s\"", tag.getKey(), tag.getValue()))
-            .collect(Collectors.joining(", "));
-    }
 
     public static Pin create(
         final Point location,
@@ -35,9 +32,12 @@ public class Pin {
         Timestamp createTime = null;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
-            pstmt.setString(1, location.toString());
+            pstmt.setObject(1, new PGpoint(location.toString()));
             pstmt.setString(2, category);
-            pstmt.setString(3, mapToHStore(tags));
+            PGobject hstorePGobject = new PGobject();
+            hstorePGobject.setType("hstore");
+            hstorePGobject.setValue(mapToHStore(tags));
+            pstmt.setObject(3, hstorePGobject);
             ResultSet resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 id = resultSet.getInt(1);
@@ -50,9 +50,19 @@ public class Pin {
             }
         } catch (SQLException e) {
             // TODO: exception handling
-            // rethrow with a different type?
+            throw new RuntimeException(e);
         }
         return new Pin(id, location, category, tags, createTime, createTime);
+    }
+
+    private static String mapToHStore(Map<String, String> map) {
+        return map
+            .entrySet()
+            .stream()
+            .map(tag ->
+                String.format("%1s=>\"%2s\"", tag.getKey(), tag.getValue())
+            )
+            .collect(Collectors.joining(", "));
     }
 
     private final Integer id;
@@ -117,5 +127,4 @@ public class Pin {
     public void setUpdateTime(Timestamp updateTime) {
         this.updateTime = updateTime;
     }
-
 }
