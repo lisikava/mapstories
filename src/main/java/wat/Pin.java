@@ -44,6 +44,7 @@ public class Pin {
             pins.update_time
         from pins, params
         where
+            pins.removed = false and
             (params.bbox is null or params.bbox @> pins.location) and
             (params.categories is null or pins.category = any(params.categories))""";
 
@@ -54,15 +55,19 @@ public class Pin {
             location = coalesce(?, location),
             category = coalesce(?, category),
             tags = coalesce(?, tags)
-        where id = ?
-        returning pins.createTime, pins.updateTime""";
+        where
+            id = ? and
+            removed = false
+        returning create_time, update_time""";
 
     private static final String deleteQuery =
         """
         update pins
         set
             removed = true
-        where id = ?""";
+        where
+            id = ? and
+            removed = false""";
 
     public static Pin create(
         final Point location,
@@ -73,7 +78,7 @@ public class Pin {
         Timestamp createTime = null;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
-            pstmt.setObject(1, location.asPGpoint());
+            pstmt.setObject(1, Point.asPGpoint(location));
             pstmt.setString(2, category);
             pstmt.setObject(3, makeHStore(tags));
             try (ResultSet resultSet = pstmt.executeQuery()) {
@@ -91,18 +96,23 @@ public class Pin {
             // TODO: exception handling
             throw new RuntimeException(e);
         }
-        return new Pin(id, location, category, tags, createTime, createTime);
+        return new Pin(
+            id,
+            location,
+            category,
+            tags,
+            createTime,
+            createTime,
+            false
+        );
     }
 
-    public static List<Pin> retrieve(
-        BoundingBox bbox,
-        Collection<String> categories
-    ) {
+    public static List<Pin> retrieve(BoundingBox bbox, String[] categories) {
         List<Pin> foundPins = new ArrayList<>();
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
-            pstmt.setObject(1, bbox.asPGbox());
-            pstmt.setArray(2, conn.createArrayOf("text", categories.toArray()));
+            pstmt.setObject(1, BoundingBox.asPGbox(bbox));
+            pstmt.setArray(2, conn.createArrayOf("text", categories));
             JSONParser parser = new JSONParser();
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -133,7 +143,8 @@ public class Pin {
                             category,
                             tags,
                             createTime,
-                            updateTime
+                            updateTime,
+                            false
                         )
                     );
                 }
@@ -153,7 +164,7 @@ public class Pin {
         Timestamp createTime, updateTime;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(updateQuery);
-            pstmt.setObject(1, location.asPGpoint());
+            pstmt.setObject(1, Point.asPGpoint(location));
             pstmt.setString(2, category);
             pstmt.setObject(3, makeHStore(tags));
             pstmt.setInt(4, id);
@@ -172,7 +183,15 @@ public class Pin {
             // TODO: handling
             throw new RuntimeException(e);
         }
-        return new Pin(id, location, category, tags, createTime, updateTime);
+        return new Pin(
+            id,
+            location,
+            category,
+            tags,
+            createTime,
+            updateTime,
+            false
+        );
     }
 
     public static void delete(Integer id) {
@@ -209,6 +228,7 @@ public class Pin {
     private Map<String, String> tags;
     private final Timestamp createTime;
     private Timestamp updateTime;
+    private boolean removed;
 
     private Pin(
         final Integer id,
@@ -216,7 +236,8 @@ public class Pin {
         final String category,
         final Map<String, String> tags,
         final Timestamp createTime,
-        final Timestamp updateTime
+        final Timestamp updateTime,
+        final boolean removed
     ) {
         this.id = id;
         this.location = location;
@@ -224,6 +245,11 @@ public class Pin {
         this.tags = tags;
         this.createTime = createTime;
         this.updateTime = updateTime;
+        this.removed = removed;
+    }
+
+    public boolean isRemoved() {
+        return removed;
     }
 
     public Integer getId() {
