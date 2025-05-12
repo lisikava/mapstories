@@ -49,12 +49,14 @@
             <button type="button" id="add-cell" class="add-cell">+</button>
             <button type="button" id="cancel-description" class="cancel-description">Cancel</button>
             <button type="button" id="submit-description" class="submit-description">Submit</button>
-
         </div>
     </div>
 </body>
 
 <script>
+    window.onload = async function() {
+        loadPins();
+    }
     var map = L.map('map', {
         center: [50.065870, 19.934727],
         zoom: 12,
@@ -167,7 +169,8 @@
                 pins_Description_Container.classList.remove('hidden');
                 description_Container.innerHTML = `
                     <div class="description-input-group category-input-group">
-                        <div class="category-label"><b>Category</b></div>
+<!--                        <div class="category-label"><b>Category</b></div>-->
+                        <input type="text" class="tag-input" disabled value="Category">
                         <input type="text" class="description-input" placeholder="Enter category">
                    </div>
                 `;   
@@ -185,7 +188,16 @@
                     }
                 }
 
-        });   
+        });
+
+        async function loadPins() {
+            const response = await fetch('/pins');
+            const pins = await response.json();
+            console.log(pins);
+            pins.forEach(pin => {
+                const marker = L.marker([pin.location.lat, pin.location.lon], {icon: pin_icon}).addTo(map);
+            });
+        }
     
 </script>    
 </html>
