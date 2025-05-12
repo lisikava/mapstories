@@ -50,10 +50,21 @@ public class Pin {
 
     private static final String updateQuery =
         """
+        update pins
+        set
+            location = ?,
+            category = ?,
+            tags = ?
+        where id = ?
+        returning pins.createTime, pins.updateTime;
         """;
 
     private static final String deleteQuery =
         """
+        update pins
+        set
+            removed = true
+        where id = ?;
         """;
 
     public static Pin create(
@@ -145,10 +156,10 @@ public class Pin {
         Timestamp createTime, updateTime;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(updateQuery);
-            pstmt.setInt(1, id);
-            pstmt.setObject(2, location.asPGpoint());
-            pstmt.setString(3, category);
-            pstmt.setObject(4, makeHStore(tags));
+            pstmt.setObject(1, location.asPGpoint());
+            pstmt.setString(2, category);
+            pstmt.setObject(3, makeHStore(tags));
+            pstmt.setInt(4, id);
             try (ResultSet resultSet = pstmt.executeQuery()) {
                 if (resultSet.next()) {
                     createTime = resultSet.getTimestamp(1);
