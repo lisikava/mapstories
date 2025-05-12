@@ -1,1 +1,2 @@
 # mapstories
+MapStories is an application for viewing and sharing information with geographical location. It allows users to add pins to the map that represent personal memories, reported incidents, community events, lost/found items, and much more.
