@@ -26,11 +26,9 @@ public class AppTest {
     public void pinRetrievalTest() {
         init();
         assertDoesNotThrow(() -> {
-            var categories = new ArrayList<String>();
-            categories.add("story");
             var pins = Pin.retrieve(
                 new BoundingBox(60, 60, 40, 40),
-                categories
+                new String[] { "story" }
             );
             System.out.println("Found something, precisely: " + pins.size());
             verbose(pins.get(0));
