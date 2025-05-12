@@ -29,7 +29,7 @@
               </div>
               <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="58px" height="58px" viewBox="0 0 16 16" preserveAspectRatio="none">
                 <circle cx="8" cy="8" r="6.215" transform="rotate(90 8 8)"></circle>
-                <image href="https://uxwing.com/wp-content/themes/uxwing/download/user-interface/search-icon.svg" x="5.2" y="5.5" width="6" height="6", fill="#de7813" />
+                <image href="https://uxwing.com/wp-content/themes/uxwing/download/user-interface/search-icon.svg" x="5.2" y="5.5" width="6" height="6", fill="#424242" />
               </svg>
              </div>
             <div class="lasso-border">
@@ -41,7 +41,8 @@
     <div id="pins-description-container" class="hidden">
         <div id="description-container">
             <div class="description-input-group">
-                <input type="text" id="description-input" placeholder="Enter description">
+                <div class="category-label"><b>Category</b></div>
+                <input type="text" id="description-input" placeholder="<b>Enter category</b>">
             </div>
         </div>
         <div class="controls">
@@ -93,47 +94,41 @@
             cancel_Description_Button.addEventListener('click', cancel_Description_Handler);
         }
         const add_Description_Handler = function(){
-                    const new_Description_Input = document.createElement('div');
-                    new_Description_Input.classList.add('description-input-group');
-                    new_Description_Input.innerHTML = '<input type="text" class="description-input" placeholder="Enter description">';
-                    description_Container.appendChild(new_Description_Input);
-                };
-        /*const submit_Description_Handler = function(){
-                    const description_Inputs = description_Container.querySelectorAll('.description-input');
-                    const current_Pin_Descriptions = Array.from(description_Inputs)
-                        .map(input => input.value)
-                        .filter(value => value.trim() !== '');
-                    if (current_Pin_Descriptions.length > 0) {
-                        const popup_Content = current_Pin_Descriptions.join('<br><hr>');
-                        current_pin.bindPopup(popup_Content).openPopup();
-                        all_Descriptions.push(current_Pin_Descriptions);
-                    } else {
-                        map.removeLayer(current_pin);
-                    }    
-                    pins_Description_Container.classList.add('hidden');
-                    current_pin = null;
-                    form_Open = false;
-                    remove_listeners();
-                };*/
+            const new_Description_Input = document.createElement('div');
+            new_Description_Input.classList.add('description-input-group');
+            new_Description_Input.innerHTML = `
+                        <input type="text" class="tag-input" placeholder="Tag">
+                        <input type="text" class="description-input" placeholder="Enter description">
+                `;
+                description_Container.appendChild(new_Description_Input);
+        };
 
         const submit_Description_Handler = function(){
-                    const description_Inputs = description_Container.querySelectorAll('.description-input');
-                    const current_Pin_Descriptions = Array.from(description_Inputs)
-                        .map(input => input.value)
-                        .filter(value => value.trim() !== '');
+            const description_Groups = description_Container.querySelectorAll('.description-input-group');
+            const current_Pin_Tags_And_Descriptions = Array.from(description_Groups).map(pair => {
+                    const tag_Input = pair.querySelector('.tag-input');
+                    const description_Input = pair.querySelector('.description-input');
+                    const tag = tag_Input ? tag_Input.value.trim() : '';
+                    const description = description_Input ? description_Input.value.trim() : ''; 
+                    return {tag: tag, description: description};
+                }).filter(pair => pair.tag != '' || pair.description !== '');
 
-                    if (current_Pin_Descriptions.length > 0) {
-                        const popup_Content = current_Pin_Descriptions.join('<br><hr>');
-                        current_pin.bindPopup(popup_Content).openPopup();
-                        placed_pins.push({pin: current_pin, tags: current_Pin_Descriptions});
-                    } else {
+                if (current_Pin_Tags_And_Descriptions.length > 0) {
+                    let popup_Content = '';
+                    current_Pin_Tags_And_Descriptions.forEach(pair => {
+                        popup_Content += `<b>${pair.tag}:</b> ${pair.description}<br><hr>`;
+                    });
+                    current_pin.bindPopup(popup_Content).openPopup();
+                    placed_pins.push({pin: current_pin, Tags_And_Descriptions: current_Pin_Tags_And_Descriptions});
+                    
+                } else {
                         map.removeLayer(current_pin);
-                    }    
-                    pins_Description_Container.classList.add('hidden');
-                    current_pin = null;
-                    form_Open = false;
-                    remove_listeners();
-                };        
+                }    
+                pins_Description_Container.classList.add('hidden');
+                current_pin = null;
+                form_Open = false;
+                remove_listeners();
+            };
 
         const cancel_Description_Handler = function(){
                     map.removeLayer(current_pin);
@@ -141,74 +136,56 @@
                     current_pin = null;
                     form_Open = false;
                     remove_listeners();
-                };  
-                
-        function display_Pin_Content(descriptions){
-            description_Container.innerHTML = '';
-            if (descriptions && descriptions.length > 0) {
-                descriptions.forEach(desc => {
-                    const description_Div = document.createElement('div');
-                    description_Div.classList.add('description-input-group');
-                    description_Div.textContent = desc;
-                    description_Container.appendChild(description_Div);
-                });
-                pins_Description_Container.classList.remove('hidden');
-            } else{
-                pins_Description_Container.classList.add('hidden');
+        };  
+         
+        function display_Pin_Content(tags_And_Descriptions){
+                description_Container.innerHTML = '';
+                if (tags_And_Descriptions && tags_And_Descriptions.length > 0) {
+                    tags_And_Descriptions.forEach(desc => {
+                        const description_Div = document.createElement('div');
+                        description_Div.classList.add('description-input-group');
+                        description_Div.innerHTML = `<b>${pair.tag}:</b> ${pair.description}`;
+                        description_Container.appendChild(description_Div);
+                    });
+                    pins_Description_Container.classList.remove('hidden');
+                } else{
+                    pins_Description_Container.classList.add('hidden');
+                }
             }
-        } 
-        /*
-        map.on('click', function(e) {
+
+        map.on('click', function(e){
             let pin_Clicked = false;
-            placed_pins.forEach(pin_content => {
-                if (e.layerPoint && pin_content.pin.getLatLng().equalst(e.latlng)) {
-                    display_Pin_Content(pin_content.tags);
+            placed_pins.forEach(pinInfo => {
+                if (e.layerPoint && pinInfo.pin.getLatLng().equals(e.latlng)){
+                    display_Pin_Content(pinInfo.tags_And_Descriptions);
                     pin_Clicked = true;
                 }
-            })
+            });
 
-            if (!pin_Clicked && !form_Open){
+            if (!pin_Clicked && !form_Open) {
                 form_Open = true;
                 pins_Description_Container.classList.remove('hidden');
                 description_Container.innerHTML = `
-                    <div class="description-input-group">
-                        <input type="text" class="description-input" placeholder="Enter description">
-                    </div>    
-                `;
+                    <div class="description-input-group category-input-group">
+                        <div class="category-label"><b>Category</b></div>
+                        <input type="text" class="description-input" placeholder="Enter category">
+                   </div>
+                `;   
+                
                 description_Container.scrollTop = 0;
-                current_pin = L.marker(e.latlng, { icon: pin_icon }).addTo(map);
+                current_pin = L.marker(e.latlng, {icon: pin_icon}).addTo(map);
                 addListeners();
             } else if (!pin_Clicked && form_Open) {
-                pins_Description_Container.classList.add('hidden');
-                form_Open = false;
-                if (current_pin){
-                    map.removeLayer(current_pin);
-                    current_pin(null);
-                    remove_listeners();
+                    pins_Description_Container.classList.add('hidden');
+                    form_Open = false;
+                    if (current_pin) {
+                        map.removeLayer(current_pin);
+                        current_pin = null;
+                        remove_listeners();
+                    }
                 }
-            }
 
-        }); */
-        
-        
-        
-        
-        map.on('click', function(e) {
-            if (!form_Open){
-                form_Open = true;
-                pins_Description_Container.classList.remove('hidden');
-                description_Container.innerHTML = `
-                    <div class="description-input-group">
-                        <input type="text" class="description-input" placeholder="Enter description">
-                    </div>    
-                `;
-                description_Container.scrollTop = 0;
-                current_pin = L.marker(e.latlng, { icon: pin_icon }).addTo(map);
-
-                addListeners();
-
-            }
-
-        });
+        });   
+    
 </script>    
 </html>

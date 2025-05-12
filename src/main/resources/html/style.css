@@ -1,8 +1,10 @@
 :root{
     --gold-color: rgba(216,121,31,255);
     --bgr-color: rgb(37, 47, 59);
-    --cell-width: 300px;
+    --cell-width: 150px;
     --cell-height: 30px;
+    --color-grey: rgb(66,66,66);
+
 }
 body {
     font-family: "Roboto", sans-serif;
@@ -64,7 +66,7 @@ body {
     letter-spacing: 3px;
     line-height: 1.1;
     text-align: left;
-    color: #000;
+    color: var(--color-grey);
   }
   
   .lasso-border {
