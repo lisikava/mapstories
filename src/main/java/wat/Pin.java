@@ -64,10 +64,7 @@ public class Pin {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
             pstmt.setObject(1, location.asPGpoint());
             pstmt.setString(2, category);
-            PGobject hstorePGobject = new PGobject();
-            hstorePGobject.setType("hstore");
-            hstorePGobject.setValue(mapToHStore(tags));
-            pstmt.setObject(3, hstorePGobject);
+            pstmt.setObject(3, makeHStore(tags));
             ResultSet resultSet = pstmt.executeQuery();
             if (resultSet.next()) {
                 id = resultSet.getInt(1);
@@ -135,14 +132,20 @@ public class Pin {
         return foundPins;
     }
 
-    private static String mapToHStore(Map<String, String> map) {
-        return map
-            .entrySet()
-            .stream()
-            .map(tag ->
-                String.format("%1s=>\"%2s\"", tag.getKey(), tag.getValue())
-            )
-            .collect(Collectors.joining(", "));
+    private static PGobject makeHStore(Map<String, String> map)
+        throws SQLException {
+        PGobject obj = new PGobject();
+        obj.setType("hstore");
+        obj.setValue(
+            map
+                .entrySet()
+                .stream()
+                .map(tag ->
+                    String.format("%1s=>\"%2s\"", tag.getKey(), tag.getValue())
+                )
+                .collect(Collectors.joining(", "))
+        );
+        return obj;
     }
 
     private final Integer id;
