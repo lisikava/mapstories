@@ -19,7 +19,7 @@ public record Point(double lat, double lon) {
         this(point.x, point.y);
     }
 
-    public PGpoint asPGpoint() {
-        return new PGpoint(lat, lon);
+    public static PGpoint asPGpoint(Point point) {
+        return (point == null) ? null : new PGpoint(point.lat, point.lon);
     }
 }

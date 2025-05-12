@@ -12,7 +12,9 @@ public record BoundingBox(
         this(box.point[0].x, box.point[0].y, box.point[1].x, box.point[1].y);
     }
 
-    public PGbox asPGbox() {
-        return new PGbox(south, west, north, east);
+    public static PGbox asPGbox(BoundingBox bbox) {
+        return (bbox == null)
+            ? null
+            : new PGbox(bbox.south, bbox.west, bbox.north, bbox.east);
     }
 }
