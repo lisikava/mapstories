@@ -1,6 +1,8 @@
 :root{
     --gold-color: rgba(216,121,31,255);
     --bgr-color: rgb(37, 47, 59);
+    --cell-width: 300px;
+    --cell-height: 30px;
 }
 body {
     font-family: "Roboto", sans-serif;
@@ -36,7 +38,6 @@ nav {
     left: 50%;
     transform: translateX(-50%);
     z-index: 999;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }       
 
 body {
@@ -136,3 +137,86 @@ body {
     transition: stroke-dashoffset 0.5s;
     stroke: var(--gold-color);
   }
+
+@font-face {
+  font-family: 'Brittanian';
+  src: url('./assets/brittanian/Brittanian.ttf') format('truetype'),
+       url('./assets/brittanian/Brittanian.otf') format('opentype');
+  font-weight:bold;
+  font-style: normal;
+}  
+.app-name{
+  font-family: 'Brittanian', sans-serif;
+  font-size: 70px;
+  text-align: center;
+  color: var(--gold-color);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+}
+
+#pins-description-container {
+  position: absolute;
+  border-radius: 20px;
+  top: 20%;
+  left: 2%;
+  padding: 15px;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  background-color: rgba(77, 96, 128, 0.8);
+  max-height: calc(6*var(--cell-height) + 30px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+
+}
+.description-input-group {
+  margin-bottom: 10px;
+}
+.description-input-group input[type="text"] {
+  width: var(--cell-width);
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #8d4747;
+  box-sizing: border-box;
+}
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: space-between;
+}
+.controls > button:nth-child(1) { 
+    margin-right: auto; 
+}
+.add-cell {
+  padding: 8px 15px;
+  background-color: #2596be; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.submit-description {
+  padding: 8px 15px;
+  background-color: #532dcf; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.cancel-description{
+  padding: 8px 15px;
+  background-color: #a07252; 
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.hidden{
+  display: none;
+}

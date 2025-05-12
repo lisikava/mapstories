@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
-     <!-- Make sure you put this AFTER Leaflet's CSS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
@@ -20,6 +19,7 @@
 
 <body>
     <nav>
+        <div class="app-name">MapStories</div>
         <div class="lasso">
             <div class="lasso-text">
               Search
@@ -38,6 +38,19 @@
           
     </nav>
     <div id="map"></div>
+    <div id="pins-description-container" class="hidden">
+        <div id="description-container">
+            <div class="description-input-group">
+                <input type="text" id="description-input" placeholder="Enter description">
+            </div>
+        </div>
+        <div class="controls">
+            <button type="button" id="add-cell" class="add-cell">+</button>
+            <button type="button" id="cancel-description" class="cancel-description">Cancel</button>
+            <button type="button" id="submit-description" class="submit-description">Submit</button>
+
+        </div>
+    </div>
 </body>
 
 <script>
@@ -57,52 +70,145 @@
         iconSize: [40, 40],
     });
 
-    let pins = [];
+        const pins_Description_Container = document.getElementById('pins-description-container');
+        const description_Container = document.getElementById('description-container');
+        const add_Cell_Button = document.getElementById('add-cell');
+        const submit_Description_Button = document.getElementById('submit-description');
+        const cancel_Description_Button = document.getElementById('cancel-description');
 
-    map.on("click", function(e){
-        const pinDescription = `
-            <div class="popup-from">
-                <textarea id="pin-description" placeholder="Enter description here"></textarea><br>
-                <button id="pin-submit-button">Submit</button>
-            </div>    
-        `;
+        let current_pin;
+        let form_Open = false;
+        const all_Descriptions = [];
+        const placed_pins = [];
 
-        var temp_pin = new L.marker(
-            [e.latlng.lat, e.latlng.lng],{
-                icon: pin_icon,}
-        ).addTo(map)
-        .bindPopup(pinDescription)
-        .openPopup();
+        function remove_listeners(){
+            add_Cell_Button.removeEventListener('click', add_Description_Handler);
+            submit_Description_Button.removeEventListener('click',submit_Description_Handler);
+            cancel_Description_Button.removeEventListener('click', cancel_Description_Handler);        
+        }
 
-        const submitButton= document.getElementById('pin-submit-button');
-            if (submitButton){
-                submitButton.onclick = function() {
-                const pin_description = document.getElementById('pin-description').value;
+        function addListeners() {
+            add_Cell_Button.addEventListener('click', add_Description_Handler);
+            submit_Description_Button.addEventListener('click', submit_Description_Handler);
+            cancel_Description_Button.addEventListener('click', cancel_Description_Handler);
+        }
+        const add_Description_Handler = function(){
+                    const new_Description_Input = document.createElement('div');
+                    new_Description_Input.classList.add('description-input-group');
+                    new_Description_Input.innerHTML = '<input type="text" class="description-input" placeholder="Enter description">';
+                    description_Container.appendChild(new_Description_Input);
+                };
+        /*const submit_Description_Handler = function(){
+                    const description_Inputs = description_Container.querySelectorAll('.description-input');
+                    const current_Pin_Descriptions = Array.from(description_Inputs)
+                        .map(input => input.value)
+                        .filter(value => value.trim() !== '');
+                    if (current_Pin_Descriptions.length > 0) {
+                        const popup_Content = current_Pin_Descriptions.join('<br><hr>');
+                        current_pin.bindPopup(popup_Content).openPopup();
+                        all_Descriptions.push(current_Pin_Descriptions);
+                    } else {
+                        map.removeLayer(current_pin);
+                    }    
+                    pins_Description_Container.classList.add('hidden');
+                    current_pin = null;
+                    form_Open = false;
+                    remove_listeners();
+                };*/
+
+        const submit_Description_Handler = function(){
+                    const description_Inputs = description_Container.querySelectorAll('.description-input');
+                    const current_Pin_Descriptions = Array.from(description_Inputs)
+                        .map(input => input.value)
+                        .filter(value => value.trim() !== '');
+
+                    if (current_Pin_Descriptions.length > 0) {
+                        const popup_Content = current_Pin_Descriptions.join('<br><hr>');
+                        current_pin.bindPopup(popup_Content).openPopup();
+                        placed_pins.push({pin: current_pin, tags: current_Pin_Descriptions});
+                    } else {
+                        map.removeLayer(current_pin);
+                    }    
+                    pins_Description_Container.classList.add('hidden');
+                    current_pin = null;
+                    form_Open = false;
+                    remove_listeners();
+                };        
+
+        const cancel_Description_Handler = function(){
+                    map.removeLayer(current_pin);
+                    pins_Description_Container.classList.add('hidden');
+                    current_pin = null;
+                    form_Open = false;
+                    remove_listeners();
+                };  
                 
-                if (pin_description.trim() === ''){
-                    alert('Description cannot be empty!');
-                    return;
+        function display_Pin_Content(descriptions){
+            description_Container.innerHTML = '';
+            if (descriptions && descriptions.length > 0) {
+                descriptions.forEach(desc => {
+                    const description_Div = document.createElement('div');
+                    description_Div.classList.add('description-input-group');
+                    description_Div.textContent = desc;
+                    description_Container.appendChild(description_Div);
+                });
+                pins_Description_Container.classList.remove('hidden');
+            } else{
+                pins_Description_Container.classList.add('hidden');
+            }
+        } 
+        /*
+        map.on('click', function(e) {
+            let pin_Clicked = false;
+            placed_pins.forEach(pin_content => {
+                if (e.layerPoint && pin_content.pin.getLatLng().equalst(e.latlng)) {
+                    display_Pin_Content(pin_content.tags);
+                    pin_Clicked = true;
                 }
-                temp_pin.closePop();
+            })
 
-                const new_pin = new L.marker(
-                    [e.latlng.lat, e.latlng.lng],{
-                        icon: pin_icon,
-                        title: pin_description,
-                        clickable: true,
-                    }).addTo(map)
-                    .bindPopup(pin_description)
-                    .on('mouseover', function(){
-                        new_pin.openPopup();
-                    }) 
-                    .on('mouseout', function() {
-                        this.closePopup();
-                    });
+            if (!pin_Clicked && !form_Open){
+                form_Open = true;
+                pins_Description_Container.classList.remove('hidden');
+                description_Container.innerHTML = `
+                    <div class="description-input-group">
+                        <input type="text" class="description-input" placeholder="Enter description">
+                    </div>    
+                `;
+                description_Container.scrollTop = 0;
+                current_pin = L.marker(e.latlng, { icon: pin_icon }).addTo(map);
+                addListeners();
+            } else if (!pin_Clicked && form_Open) {
+                pins_Description_Container.classList.add('hidden');
+                form_Open = false;
+                if (current_pin){
+                    map.removeLayer(current_pin);
+                    current_pin(null);
+                    remove_listeners();
+                }
+            }
 
-                    pins.push(new_pin);
-                    document.getElementById('pin-description').value = '';
-            };
-        }    
-    });
+        }); */
+        
+        
+        
+        
+        map.on('click', function(e) {
+            if (!form_Open){
+                form_Open = true;
+                pins_Description_Container.classList.remove('hidden');
+                description_Container.innerHTML = `
+                    <div class="description-input-group">
+                        <input type="text" class="description-input" placeholder="Enter description">
+                    </div>    
+                `;
+                description_Container.scrollTop = 0;
+                current_pin = L.marker(e.latlng, { icon: pin_icon }).addTo(map);
+
+                addListeners();
+
+            }
+
+        });
 </script>    
 </html>
