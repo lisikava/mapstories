@@ -1,6 +1,5 @@
 package wat;
 
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,19 +7,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Spliterators;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.postgresql.geometric.PGpoint;
-import org.postgresql.jdbc.PgArray;
 import org.postgresql.util.PGobject;
 
 public class Pin {
@@ -53,6 +48,14 @@ public class Pin {
             (params.categories is null or pins.category = any(params.categories));
         """;
 
+    private static final String updateQuery =
+        """
+        """;
+
+    private static final String deleteQuery =
+        """
+        """;
+
     public static Pin create(
         final Point location,
         final String category,
@@ -65,15 +68,16 @@ public class Pin {
             pstmt.setObject(1, location.asPGpoint());
             pstmt.setString(2, category);
             pstmt.setObject(3, makeHStore(tags));
-            ResultSet resultSet = pstmt.executeQuery();
-            if (resultSet.next()) {
-                id = resultSet.getInt(1);
-                createTime = resultSet.getTimestamp(2);
+            try (ResultSet resultSet = pstmt.executeQuery()) {
                 if (resultSet.next()) {
-                    throw new SQLException("Insert returned multiple rows");
+                    id = resultSet.getInt(1);
+                    createTime = resultSet.getTimestamp(2);
+                    if (resultSet.next()) {
+                        throw new SQLException("Insert returned multiple rows");
+                    }
+                } else {
+                    throw new SQLException("Insert returned no rows");
                 }
-            } else {
-                throw new SQLException("Insert returned no rows");
             }
         } catch (SQLException e) {
             // TODO: exception handling
@@ -130,6 +134,49 @@ public class Pin {
             throw new RuntimeException(e);
         }
         return foundPins;
+    }
+
+    public static Pin update(
+        Integer id,
+        Point location,
+        String category,
+        Map<String, String> tags
+    ) {
+        Timestamp createTime, updateTime;
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(updateQuery);
+            pstmt.setInt(1, id);
+            pstmt.setObject(2, location.asPGpoint());
+            pstmt.setString(3, category);
+            pstmt.setObject(4, makeHStore(tags));
+            try (ResultSet resultSet = pstmt.executeQuery()) {
+                if (resultSet.next()) {
+                    createTime = resultSet.getTimestamp(1);
+                    updateTime = resultSet.getTimestamp(2);
+                    if (resultSet.next()) {
+                        throw new SQLException("Update returned multiple rows");
+                    }
+                } else {
+                    throw new SQLException("Update returned no rows");
+                }
+            }
+        } catch (SQLException e) {
+            // TODO: handling
+            throw new RuntimeException(e);
+        }
+        return new Pin(id, location, category, tags, createTime, updateTime);
+    }
+
+    public static void delete(Integer id) {
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(deleteQuery);
+            pstmt.setInt(1, id);
+            pstmt.execute();
+            assert (pstmt.getUpdateCount() == 1);
+        } catch (SQLException e) {
+            // TODO: handling
+            throw new RuntimeException(e);
+        }
     }
 
     private static PGobject makeHStore(Map<String, String> map)
