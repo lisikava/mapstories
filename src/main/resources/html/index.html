@@ -193,9 +193,13 @@
         async function loadPins() {
             const response = await fetch('/pins');
             const pins = await response.json();
-            console.log(pins);
             pins.forEach(pin => {
                 const marker = L.marker([pin.location.lat, pin.location.lon], {icon: pin_icon}).addTo(map);
+                popup_Content = '';
+                popup_Content += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
+                current_pin = marker;
+                current_pin.bindPopup(popup_Content);
+                placed_pins.push({pin: current_pin, Tags_And_Descriptions: {tag: 'Category', description: pin.category}});
             });
         }
     
