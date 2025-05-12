@@ -45,27 +45,24 @@ public class Pin {
         from pins, params
         where
             (params.bbox is null or params.bbox @> pins.location) and
-            (params.categories is null or pins.category = any(params.categories));
-        """;
+            (params.categories is null or pins.category = any(params.categories))""";
 
     private static final String updateQuery =
         """
         update pins
         set
-            location = ?,
-            category = ?,
-            tags = ?
+            location = coalesce(?, location),
+            category = coalesce(?, category),
+            tags = coalesce(?, tags)
         where id = ?
-        returning pins.createTime, pins.updateTime;
-        """;
+        returning pins.createTime, pins.updateTime""";
 
     private static final String deleteQuery =
         """
         update pins
         set
             removed = true
-        where id = ?;
-        """;
+        where id = ?""";
 
     public static Pin create(
         final Point location,
