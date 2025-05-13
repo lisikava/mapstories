@@ -6,6 +6,7 @@
     --color-grey: rgb(66,66,66);
     --color-creme: #D3C196;
     --color-blue: #009FB7;
+    --color-black: #272727;
 }
 body {
     font-family: "Roboto", sans-serif;
@@ -198,7 +199,7 @@ body {
 .add-cell {
   padding: 8px 15px;
   background-color: var(--color-blue); 
-  color: var(--color-creme);
+  color: var(--color-black);
   border: none;
   cursor: pointer;
   border-radius: 5px;
@@ -206,15 +207,15 @@ body {
 .submit-description {
   padding: 8px 15px;
   background-color: var(--color-blue); 
-  color: var(--color-creme);
+  color: var(--color-black);
   border: none;
   cursor: pointer;
   border-radius: 5px;
 }
 .cancel-description{
   padding: 8px 15px;
-  background-color: #a82c07; 
-  color: var(--color-creme);
+  background-color: #b44d2d; 
+  color: var(--color-black);
   border: none;
   cursor: pointer;
   border-radius: 5px;
