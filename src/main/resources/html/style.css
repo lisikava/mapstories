@@ -220,6 +220,14 @@ body {
   cursor: pointer;
   border-radius: 5px;
 }
+.select-icon{
+  padding: 8px 15px;
+  background-color: var(--color-blue); 
+  color: var(--color-black);
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
 
 .hidden{
   display: none;
