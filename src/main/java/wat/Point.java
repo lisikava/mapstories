@@ -20,6 +20,8 @@ public record Point(double lat, double lon) {
     }
 
     public static PGpoint asPGpoint(Point point) {
-        return (point == null) ? null : new PGpoint(point.lat, point.lon);
+        return (point == null)
+            ? new PGpoint()
+            : new PGpoint(point.lat, point.lon);
     }
 }
