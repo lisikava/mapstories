@@ -4,7 +4,8 @@
     --cell-width: 150px;
     --cell-height: 30px;
     --color-grey: rgb(66,66,66);
-
+    --color-creme: #D3C196;
+    --color-blue: #009FB7;
 }
 body {
     font-family: "Roboto", sans-serif;
@@ -66,7 +67,7 @@ body {
     letter-spacing: 3px;
     line-height: 1.1;
     text-align: left;
-    color: var(--color-grey);
+    color: var(--color-creme);
   }
   
   .lasso-border {
@@ -196,24 +197,24 @@ body {
 }
 .add-cell {
   padding: 8px 15px;
-  background-color: #2596be; 
-  color: white;
+  background-color: var(--color-blue); 
+  color: var(--color-creme);
   border: none;
   cursor: pointer;
   border-radius: 5px;
 }
 .submit-description {
   padding: 8px 15px;
-  background-color: #532dcf; 
-  color: white;
+  background-color: var(--color-blue); 
+  color: var(--color-creme);
   border: none;
   cursor: pointer;
   border-radius: 5px;
 }
 .cancel-description{
   padding: 8px 15px;
-  background-color: #a07252; 
-  color: white;
+  background-color: #a82c07; 
+  color: var(--color-creme);
   border: none;
   cursor: pointer;
   border-radius: 5px;
