@@ -14,7 +14,7 @@ public record BoundingBox(
 
     public static PGbox asPGbox(BoundingBox bbox) {
         return (bbox == null)
-            ? null
+            ? new PGbox()
             : new PGbox(bbox.south, bbox.west, bbox.north, bbox.east);
     }
 }
