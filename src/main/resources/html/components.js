@@ -1,6 +1,7 @@
 window.onload = async function () {
-    loadPins();
+    await loadPins();
 }
+
 var map = L.map('map', {
     center: [50.065870, 19.934727],
     zoom: 12,
@@ -12,106 +13,107 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     maxZoom: 19,
 }).addTo(map);
 
-const pin_icon = L.icon({
+const pinIcon = L.icon({
     iconUrl: './assets/pin-3.svg',
     iconSize: [40, 40],
 });
 
-const pins_Description_Container = document.getElementById('pins-description-container');
-const description_Container = document.getElementById('description-container');
-const add_Cell_Button = document.getElementById('add-cell');
-const submit_Description_Button = document.getElementById('submit-description');
-const cancel_Description_Button = document.getElementById('cancel-description');
 
-let current_pin;
-let form_Open = false;
-const all_Descriptions = [];
-const placed_pins = [];
+const pinsDescriptionContainer = document.getElementById('pins-description-container');
+const descriptionContainer = document.getElementById('description-container');
+const addCellButton = document.getElementById('add-cell');
+const submitDescriptionButton = document.getElementById('submit-description');
+const cancelDescriptionButton = document.getElementById('cancel-description');
 
-function remove_listeners() {
-    add_Cell_Button.removeEventListener('click', add_Description_Handler);
-    submit_Description_Button.removeEventListener('click', submit_Description_Handler);
-    cancel_Description_Button.removeEventListener('click', cancel_Description_Handler);
+let currentPin;
+let formOpen = false;
+const allDescriptions = [];
+const placedPins = [];
+
+function removeListeners() {
+    addCellButton.removeEventListener('click', addDescriptionHandler);
+    submitDescriptionButton.removeEventListener('click', submitDescriptionHandler);
+    cancelDescriptionButton.removeEventListener('click', cancelDescriptionHandler);
 }
 
 function addListeners() {
-    add_Cell_Button.addEventListener('click', add_Description_Handler);
-    submit_Description_Button.addEventListener('click', submit_Description_Handler);
-    cancel_Description_Button.addEventListener('click', cancel_Description_Handler);
+    addCellButton.addEventListener('click', addDescriptionHandler);
+    submitDescriptionButton.addEventListener('click', submitDescriptionHandler);
+    cancelDescriptionButton.addEventListener('click', cancelDescriptionHandler);
 }
-const add_Description_Handler = function () {
-    const new_Description_Input = document.createElement('div');
-    new_Description_Input.classList.add('description-input-group');
-    new_Description_Input.innerHTML = `
+const addDescriptionHandler = function () {
+    const newDescriptionInput = document.createElement('div');
+    newDescriptionInput.classList.add('description-input-group');
+    newDescriptionInput.innerHTML = `
                         <input type="text" class="tag-input" placeholder="Tag">
                         <input type="text" class="description-input" placeholder="Enter description">
                 `;
-    description_Container.appendChild(new_Description_Input);
+    descriptionContainer.appendChild(newDescriptionInput);
 };
 
-const submit_Description_Handler = function () {
-    const description_Groups = description_Container.querySelectorAll('.description-input-group');
-    const current_Pin_Tags_And_Descriptions = Array.from(description_Groups).map(pair => {
-        const tag_Input = pair.querySelector('.tag-input');
-        const description_Input = pair.querySelector('.description-input');
-        const tag = tag_Input ? tag_Input.value.trim() : '';
-        const description = description_Input ? description_Input.value.trim() : '';
+const submitDescriptionHandler = function () {
+    const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
+    const currentPinTagsAndDescriptions = Array.from(descriptionGroups).map(pair => {
+        const tagInput = pair.querySelector('.tag-input');
+        const descriptionInput = pair.querySelector('.description-input');
+        const tag = tagInput ? tagInput.value.trim() : '';
+        const description = descriptionInput ? descriptionInput.value.trim() : '';
         return { tag: tag, description: description };
     }).filter(pair => pair.tag != '' || pair.description !== '');
 
-    if (current_Pin_Tags_And_Descriptions.length > 0) {
-        let popup_Content = '';
-        current_Pin_Tags_And_Descriptions.forEach(pair => {
-            popup_Content += `<b>${pair.tag}:</b> ${pair.description}<br><hr>`;
+    if (currentPinTagsAndDescriptions.length > 0) {
+        let popupContent = '';
+        currentPinTagsAndDescriptions.forEach(pair => {
+            popupContent += `<b>${pair.tag}:</b> ${pair.description}<br><hr>`;
         });
-        current_pin.bindPopup(popup_Content).openPopup();
-        placed_pins.push({ pin: current_pin, Tags_And_Descriptions: current_Pin_Tags_And_Descriptions });
+        currentPin.bindPopup(popupContent).openPopup();
+        placedPins.push({ pin: currentPin, TagsAndDescriptions: currentPinTagsAndDescriptions });
 
     } else {
-        map.removeLayer(current_pin);
+        map.removeLayer(currentPin);
     }
-    pins_Description_Container.classList.add('hidden');
-    current_pin = null;
-    form_Open = false;
-    remove_listeners();
+    pinsDescriptionContainer.classList.add('hidden');
+    currentPin = null;
+    formOpen = false;
+    removeListeners();
 };
 
-const cancel_Description_Handler = function () {
-    map.removeLayer(current_pin);
-    pins_Description_Container.classList.add('hidden');
-    current_pin = null;
-    form_Open = false;
-    remove_listeners();
+const cancelDescriptionHandler = function () {
+    map.removeLayer(currentPin);
+    pinsDescriptionContainer.classList.add('hidden');
+    currentPin = null;
+    formOpen = false;
+    removeListeners();
 };
 
-function display_Pin_Content(tags_And_Descriptions) {
-    description_Container.innerHTML = '';
-    if (tags_And_Descriptions && tags_And_Descriptions.length > 0) {
-        tags_And_Descriptions.forEach(desc => {
-            const description_Div = document.createElement('div');
-            description_Div.classList.add('description-input-group');
-            description_Div.innerHTML = `<b>${pair.tag}:</b> ${pair.description}`;
-            description_Container.appendChild(description_Div);
+function displayPinContent(tagsAndDescriptions) {
+    descriptionContainer.innerHTML = '';
+    if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
+        tagsAndDescriptions.forEach(desc => {
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.classList.add('description-input-group');
+            descriptionDiv.innerHTML = `<b>${pair.tag}:</b> ${pair.description}`;
+            descriptionContainer.appendChild(descriptionDiv);
         });
-        pins_Description_Container.classList.remove('hidden');
+        pinsDescriptionContainer.classList.remove('hidden');
     } else {
-        pins_Description_Container.classList.add('hidden');
+        pinsDescriptionContainer.classList.add('hidden');
     }
 }
 
 map.on('click', function (e) {
-    let pin_Clicked = false;
-    placed_pins.forEach(pinInfo => {
+    let pinClicked = false;
+    placedPins.forEach(pinInfo => {
         if (e.layerPoint && pinInfo.pin.getLatLng().equals(e.latlng)) {
-            display_Pin_Content(pinInfo.tags_And_Descriptions);
-            pin_Clicked = true;
+            displayPinContent(pinInfo.tagsAndDescriptions);
+            pinClicked = true;
         }
     });
 
-    if (!pin_Clicked && !form_Open) {
-        form_Open = true;
-        pins_Description_Container.classList.remove('hidden');
-        description_Container.innerHTML = `
+    if (!pinClicked && !formOpen) {
+        formOpen = true;
+        pinsDescriptionContainer.classList.remove('hidden');
+        descriptionContainer.innerHTML = `
                     <div class="description-input-group category-input-group">
 <!--                        <div class="category-label"><b>Category</b></div>-->
                         <input type="text" class="tag-input" disabled value="Category">
@@ -119,16 +121,16 @@ map.on('click', function (e) {
                    </div>
                 `;
 
-        description_Container.scrollTop = 0;
-        current_pin = L.marker(e.latlng, { icon: pin_icon }).addTo(map);
+        descriptionContainer.scrollTop = 0;
+        currentPin = L.marker(e.latlng, { icon: pinIcon }).addTo(map);
         addListeners();
-    } else if (!pin_Clicked && form_Open) {
-        pins_Description_Container.classList.add('hidden');
-        form_Open = false;
-        if (current_pin) {
-            map.removeLayer(current_pin);
-            current_pin = null;
-            remove_listeners();
+    } else if (!pinClicked && formOpen) {
+        pinsDescriptionContainer.classList.add('hidden');
+        formOpen = false;
+        if (currentPin) {
+            map.removeLayer(currentPin);
+            currentPin = null;
+            removeListeners();
         }
     }
 
@@ -138,11 +140,11 @@ async function loadPins() {
     const response = await fetch('/pins');
     const pins = await response.json();
     pins.forEach(pin => {
-        const marker = L.marker([pin.location.lat, pin.location.lon], { icon: pin_icon }).addTo(map);
-        popup_Content = '';
-        popup_Content += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
-        current_pin = marker;
-        current_pin.bindPopup(popup_Content);
-        placed_pins.push({ pin: current_pin, Tags_And_Descriptions: { tag: 'Category', description: pin.category } });
+        const marker = L.marker([pin.location.lat, pin.location.lon], { icon: pinIcon }).addTo(map);
+        popupContent = '';
+        popupContent += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
+        currentPin = marker;
+        currentPin.bindPopup(popupContent);
+        placedPins.push({ pin: currentPin, TagsAndDescriptions: { tag: 'Category', description: pin.category } });
     });
 }
