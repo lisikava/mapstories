@@ -59,15 +59,12 @@ const submitDescriptionHandler = function () {
         const tag = tagInput ? tagInput.value.trim() : '';
         const description = descriptionInput ? descriptionInput.value.trim() : '';
         return { tag: tag, description: description };
-    }).filter(pair => pair.tag != '' || pair.description !== '');
+    }).filter(pair => pair.tag !== '' || pair.description !== '');
 
     if (currentPinTagsAndDescriptions.length > 0) {
-        let popupContent = '';
-        currentPinTagsAndDescriptions.forEach(pair => {
-            popupContent += `<b>${pair.tag}:</b> ${pair.description}<br><hr>`;
-        });
+        let popupContent = buildPopUpContent(currentPinTagsAndDescriptions);
         currentPin.bindPopup(popupContent).openPopup();
-        placedPins.push({ pin: currentPin, TagsAndDescriptions: currentPinTagsAndDescriptions });
+        placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
 
     } else {
         map.removeLayer(currentPin);
@@ -85,6 +82,22 @@ const cancelDescriptionHandler = function () {
     formOpen = false;
     removeListeners();
 };
+
+function buildPopUpContent(tagsAndDescriptions) {
+    const container = document.createElement('div');
+    tagsAndDescriptions.forEach(pair => {
+        const tagElement = document.createElement('b');
+        tagElement.textContent = `${pair.tag}: `;
+        const descText = document.createTextNode(pair.description);
+        const lineDiv = document.createElement('div');
+        lineDiv.appendChild(tagElement);
+        lineDiv.appendChild(descText);
+        const hr = document.createElement('hr');
+        container.appendChild(lineDiv);
+        container.appendChild(hr);
+    });
+    return container;
+}
 
 function displayPinContent(tagsAndDescriptions) {
     descriptionContainer.innerHTML = '';
@@ -137,14 +150,21 @@ map.on('click', function (e) {
 });
 
 async function loadPins() {
-    const response = await fetch('/pins');
-    const pins = await response.json();
-    pins.forEach(pin => {
-        const marker = L.marker([pin.location.lat, pin.location.lon], { icon: pinIcon }).addTo(map);
-        popupContent = '';
-        popupContent += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
-        currentPin = marker;
-        currentPin.bindPopup(popupContent);
-        placedPins.push({ pin: currentPin, TagsAndDescriptions: { tag: 'Category', description: pin.category } });
-    });
+    try {
+        const response = await fetch('/pins');
+        const pins = await response.json();
+        pins.forEach(pin => {
+            const marker = L.marker([pin.location.lat, pin.location.lon], { icon: pinIcon }).addTo(map);
+            const tagsAndDescriptions = [
+                { tag: 'Category', description: pin.category },
+                ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
+            ];
+            popupContent = buildPopUpContent(tagsAndDescriptions);
+            // popupContent += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
+            marker.bindPopup(popupContent);
+            placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions });
+        });
+    } catch (error) {
+        console.error('Failed to load pins:', error);
+    }
 }
