@@ -1,0 +1,21 @@
+{
+    "event": {
+        "expected": ["description", "when", "duration"]
+    },
+    "found": {
+        "expected": ["description", "email"]
+    },
+    "lost": {
+        "expected": ["description", "email"]
+    },
+    "report": {
+        "is_vague": true,
+        "expected": ["description"]
+    },
+    "report.abandoned_vehicle": {
+        "expected": ["check_date", "number_plate"]
+    },
+    "story": {
+        "expected": ["story"]
+    }
+}
