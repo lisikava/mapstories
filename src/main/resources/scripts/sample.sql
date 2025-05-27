@@ -31,11 +31,14 @@ insert into pins(location, category, tags) values
     (
         '50.05730, 19.95797'::point,
         'lost',
-        hstore(
-            'description',
-            'I''ve lost a pair of orange polyester gloves somewhere near '
-            || 'Grzegorzeckie roundabout.'
-        )
+        hstore(array[
+            [
+                'description',
+                'I''ve lost a pair of orange polyester gloves somewhere near '
+                || 'Grzegorzeckie roundabout.'
+            ],
+            ['email', 'magdalena@mapstories.io']
+        ])
     ),
     (
         '50.06608, 19.95948'::point,
@@ -48,33 +51,43 @@ insert into pins(location, category, tags) values
                 || '45 euros plus change inside.'
             ],
             ['money', '45 eur'],
-            ['reward', '10 eur']
+            ['reward', '10 eur'],
+            ['email', 'leonard@mapstories.io']
         ])
     ),
     (
         '50.06326, 19.94352'::point,
         'found',
-        hstore(
-            'description',
-            'Found a pair of white knitted wool gloven on the pavement.'
-        )
+        hstore(array[
+            [
+                'description',
+                'Found a pair of white knitted wool gloves on the pavement.'
+            ],
+            ['email', 'krakow.explorer@mapstories.io']
+        ])
     ),
     (
         '50.06531, 19.92931'::point,
         'lost',
-        hstore(
-            'description',
-            'Lost my precious 5m tape-measure somewhere in Wislawa Szymborska '
-            || 'Park'
-        )
+        hstore(array[
+            [
+                'description',
+                'Lost my precious 5m tape-measure somewhere in Wislawa '
+                || 'Szymborska Park'
+            ],
+            ['email', 'the.builder@mapstories.io']
+        ])
     ),
     (
         '50.06511, 19.92838'::point,
         'found',
-        hstore(
-            'description',
-            'Found a 5m tape-measure under a bench.'
-        )
+        hstore(array[
+            [
+                'description',
+                'Found a 5m tape-measure under a bench.'
+            ],
+            ['email', 'jan@mapstories.io']
+        ])
     ),
     (
         '50.03442, 19.99418'::point,
@@ -121,7 +134,7 @@ insert into pins(location, category, tags) values
         '54.80456, 18.37163'::point,
         'story',
         hstore(
-            'description',
+            'story',
             'Cool pixel art graffiti inspired by video games here!'
         )
     ),
@@ -140,7 +153,7 @@ insert into pins(location, category, tags) values
         '53.90601, 27.55742'::point,
         'story',
         hstore(
-            'description',
+            'story',
             'There''s something charming about this street for me'
         )
     ),
@@ -148,8 +161,10 @@ insert into pins(location, category, tags) values
         '50.06839, 19.90592'::point,
         'event.rave',
         hstore(array[
-            ['ticket_price', 'free'],
-            ['age_limit', '16']
+            ['fee', 'free'],
+            ['when', '2025-05-08 19:00+2'],
+            ['age_limit', '16'],
+            ['email', 'miasteczko@mapstories.io']
         ])
     );
 commit;
