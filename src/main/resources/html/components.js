@@ -18,6 +18,15 @@ const pinIcon = L.icon({
     iconSize: [40, 40],
 });
 
+// Add CSS for error state
+const style = document.createElement('style');
+style.textContent = `
+    .description-input-group input.error {
+        border: 2px solid #ff4444;
+        background-color: rgba(255, 0, 0, 0.05);
+    }
+`;
+document.head.appendChild(style);
 
 const pinsDescriptionContainer = document.getElementById('pins-description-container');
 const descriptionContainer = document.getElementById('description-container');
@@ -53,22 +62,46 @@ const addDescriptionHandler = function () {
 
 const submitDescriptionHandler = function () {
     const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
+    let hasEmptyFields = false;
+
+    descriptionGroups.forEach(group => {
+        const inputs = group.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.classList.remove('error');
+        });
+    });
+
+    descriptionGroups.forEach(group => {
+        const tagInput = group.querySelector('.tag-input');
+        const descriptionInput = group.querySelector('.description-input');
+        
+        if (!tagInput.disabled && tagInput.value.trim() === '') {
+            tagInput.classList.add('error');
+            hasEmptyFields = true;
+        }
+        if (descriptionInput.value.trim() === '') {
+            descriptionInput.classList.add('error');
+            hasEmptyFields = true;
+        }
+    });
+
+    if (hasEmptyFields) {
+        alert('Please fill in all fields before submitting');
+        return;
+    }
+
     const currentPinTagsAndDescriptions = Array.from(descriptionGroups).map(pair => {
         const tagInput = pair.querySelector('.tag-input');
         const descriptionInput = pair.querySelector('.description-input');
-        const tag = tagInput ? tagInput.value.trim() : '';
-        const description = descriptionInput ? descriptionInput.value.trim() : '';
+        const tag = tagInput.value.trim();
+        const description = descriptionInput.value.trim();
         return { tag: tag, description: description };
-    }).filter(pair => pair.tag !== '' || pair.description !== '');
+    });
 
-    if (currentPinTagsAndDescriptions.length > 0) {
-        let popupContent = buildPopUpContent(currentPinTagsAndDescriptions);
-        currentPin.bindPopup(popupContent).openPopup();
-        placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
-
-    } else {
-        map.removeLayer(currentPin);
-    }
+    let popupContent = buildPopUpContent(currentPinTagsAndDescriptions);
+    currentPin.bindPopup(popupContent).openPopup();
+    placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
+    
     pinsDescriptionContainer.classList.add('hidden');
     currentPin = null;
     formOpen = false;
@@ -160,7 +193,6 @@ async function loadPins() {
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
             ];
             popupContent = buildPopUpContent(tagsAndDescriptions);
-            // popupContent += `<b>${'Category'}:</b> ${pin.category}<br><hr>`;
             marker.bindPopup(popupContent);
             placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions });
         });
