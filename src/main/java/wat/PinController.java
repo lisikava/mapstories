@@ -2,7 +2,9 @@ package wat;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+
 import java.util.List;
+import java.util.Map;
 
 
 public class PinController {
@@ -12,7 +14,16 @@ public class PinController {
     }
 
     private void getAllPins(Context ctx) {
-        List<Pin> pins = Pin.retrieve(new BoundingBox(0, 0, 60, 60), null);
+        List<Pin> pins = Pin.retrieve(
+                new PinFilter(
+                        new BoundingBox(0,
+                                        0,
+                                        60,
+                                        60
+                        ),
+                        null,
+                        Map.of()
+                ));
         ctx.json(pins);
     }
 

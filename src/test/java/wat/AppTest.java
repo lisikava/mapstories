@@ -3,6 +3,7 @@ package wat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 
@@ -27,8 +28,8 @@ public class AppTest {
         init();
         assertDoesNotThrow(() -> {
             var pins = Pin.retrieve(
-                new BoundingBox(60, 60, 40, 40),
-                new String[] { "story" }
+                new PinFilter(new BoundingBox(60, 60, 40, 40),
+                              new String[] { "story" }, Map.of())
             );
             System.out.println("Found something, precisely: " + pins.size());
             verbose(pins.get(0));
