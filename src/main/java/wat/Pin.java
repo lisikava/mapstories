@@ -1,78 +1,91 @@
 package wat;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.postgresql.geometric.PGpoint;
 import org.postgresql.util.PGobject;
 
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 public class Pin {
 
-    private static final DataSource dataSource =
-        DataSourceProvider.getDataSource();
+    private static final DataSource dataSource = DataSourceProvider.getDataSource();
 
-    private static final String createQuery =
-        """
-        insert into pins(location, category, tags)
-        values (?, ?, ?)
-        returning id, create_time""";
+    private static final String createQuery = """
+            insert into pins(location, category, tags)
+            values (?, ?, ?)
+            returning id, create_time""";
 
-    private static final String retrieveQuery =
-        """
-        with params as (select
-            ? as bbox,
-            ? as categories
-        )
-        select
-            pins.id,
-            pins.location,
-            pins.category,
-            hstore_to_json(pins.tags)::text as tags,
-            pins.create_time,
-            pins.update_time
-        from pins, params
-        where
-            pins.removed = false and
-            (params.bbox is null or params.bbox @> pins.location) and
-            (params.categories is null or pins.category = any(params.categories))""";
+    private static final String retrieveQuery = """
+            with params as (select
+                ? as bbox,
+                ? as categories,
+                ? as keys,
+                ? as values
+            )
+            select
+                pins.id,
+                pins.location,
+                pins.category,
+                hstore_to_json(pins.tags)::text as tags,
+                pins.create_time,
+                pins.update_time
+            from pins, params
+            where
+                pins.removed = false and (
+                    params.bbox is null or
+                    params.bbox @> pins.location
+                ) and (
+                    params.categories is null or
+                    exists (
+                        select 1
+                        from unnest(params.categories) super
+                        where is_subcategory_of(pins.category, super)
+                    )
+                ) and (
+                    params.keys is null or
+                    cardinality(params.keys) = 0 or
+                    not exists (
+                        select 1
+                        from unnest(keys, values) as tag(key, value)
+                        where not (
+                            exist(pins.tags, tag.key) and (
+                                tag.value is null or
+                                pins.tags->tag.key = tag.value
+                            )
+                        )
+                    )
+                )""";
 
-    private static final String updateQuery =
-        """
-        update pins
-        set
-            location = coalesce(?, location),
-            category = coalesce(?, category),
-            tags = coalesce(?, tags)
-        where
-            id = ? and
-            removed = false
-        returning create_time, update_time""";
+    private static final String updateQuery = """
+            update pins
+            set
+                location = coalesce(?, location),
+                category = coalesce(?, category),
+                tags = coalesce(?, tags)
+            where
+                id = ? and
+                removed = false
+            returning create_time, update_time""";
 
-    private static final String deleteQuery =
-        """
-        update pins
-        set
-            removed = true
-        where
-            id = ? and
-            removed = false""";
+    private static final String deleteQuery = """
+            update pins
+            set
+                removed = true
+            where
+                id = ? and
+                removed = false""";
 
-    public static Pin create(
-        final Point location,
-        final String category,
-        final Map<String, String> tags
+    public static Pin create(final Point location,
+                             final String category,
+                             final Map<String, String> tags
     ) {
         Integer id = null;
         Timestamp createTime = null;
@@ -96,58 +109,63 @@ public class Pin {
             // TODO: exception handling
             throw new RuntimeException(e);
         }
-        return new Pin(
-            id,
-            location,
-            category,
-            tags,
-            createTime,
-            createTime,
-            false
+        return new Pin(id,
+                       location,
+                       category,
+                       tags,
+                       createTime,
+                       createTime,
+                       false
         );
     }
-
-    public static List<Pin> retrieve(BoundingBox bbox, String[] categories) {
+    public static List<Pin> retrieve(PinFilter filter) {
         List<Pin> foundPins = new ArrayList<>();
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
-            pstmt.setObject(1, BoundingBox.asPGbox(bbox));
-            pstmt.setArray(2, conn.createArrayOf("text", categories));
+            if(filter.bbox() != null) {
+                pstmt.setObject(1, BoundingBox.asPGbox(filter.bbox()));
+            } else {
+                pstmt.setNull(1, Types.OTHER);
+            }
+            pstmt.setArray(2, conn.createArrayOf("text", filter.categories()));
+            pstmt.setArray(3,
+                           conn.createArrayOf("text",
+                                              filter.tags()
+                                                      .keySet()
+                                                      .toArray()
+                           )
+            );
+            pstmt.setArray(4,
+                           conn.createArrayOf("text",
+                                              filter.tags()
+                                                      .values()
+                                                      .toArray()
+                           )
+            );
+            ResultSet rs = pstmt.executeQuery();
             JSONParser parser = new JSONParser();
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                while (resultSet.next()) {
-                    Integer id = resultSet.getInt(1);
-                    Point location = new Point(
-                        resultSet.getObject(2, PGpoint.class)
+            while (rs.next()) {
+                var tags = new TreeMap<String, String>();
+                try {
+                    JSONObject obj = (JSONObject) parser.parse(
+                            rs.getString(4)
                     );
-                    String category = resultSet.getString(3);
-                    Map<String, String> tags = null;
-                    try {
-                        JSONObject obj = (JSONObject) parser.parse(
-                            resultSet.getString(4)
-                        );
-                        tags = new TreeMap<>();
-                        for (Object key : obj.keySet()) {
-                            tags.put((String) key, (String) obj.get(key));
-                        }
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
+                    tags = new TreeMap<>();
+                    for (Object key : obj.keySet()) {
+                        tags.put((String) key, (String) obj.get(key));
                     }
-                    Timestamp createTime = resultSet.getTimestamp(5);
-                    Timestamp updateTime = resultSet.getTimestamp(6);
-
-                    foundPins.add(
-                        new Pin(
-                            id,
-                            location,
-                            category,
-                            tags,
-                            createTime,
-                            updateTime,
-                            false
-                        )
-                    );
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
+                foundPins.add(new Pin(
+                        rs.getInt(1),
+                        new Point(rs.getObject(2, PGpoint.class)),
+                        rs.getString(3),
+                        tags,
+                        rs.getTimestamp(5),
+                        rs.getTimestamp(6),
+                        false
+                ));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -155,11 +173,10 @@ public class Pin {
         return foundPins;
     }
 
-    public static Pin update(
-        Integer id,
-        Point location,
-        String category,
-        Map<String, String> tags
+    public static Pin update(Integer id,
+                             Point location,
+                             String category,
+                             Map<String, String> tags
     ) {
         Timestamp createTime, updateTime;
         try (Connection conn = dataSource.getConnection()) {
@@ -183,14 +200,13 @@ public class Pin {
             // TODO: handling
             throw new RuntimeException(e);
         }
-        return new Pin(
-            id,
-            location,
-            category,
-            tags,
-            createTime,
-            updateTime,
-            false
+        return new Pin(id,
+                       location,
+                       category,
+                       tags,
+                       createTime,
+                       updateTime,
+                       false
         );
     }
 
@@ -207,18 +223,16 @@ public class Pin {
     }
 
     private static PGobject makeHStore(Map<String, String> map)
-        throws SQLException {
+    throws SQLException {
         PGobject obj = new PGobject();
         obj.setType("hstore");
-        obj.setValue(
-            map
-                .entrySet()
-                .stream()
-                .map(tag ->
-                    String.format("%1s=>\"%2s\"", tag.getKey(), tag.getValue())
-                )
-                .collect(Collectors.joining(", "))
-        );
+        obj.setValue(map.entrySet()
+                             .stream()
+                             .map(tag -> String.format("%1s=>\"%2s\"",
+                                                       tag.getKey(),
+                                                       tag.getValue()
+                             ))
+                             .collect(Collectors.joining(", ")));
         return obj;
     }
 
@@ -230,14 +244,13 @@ public class Pin {
     private Timestamp updateTime;
     private boolean removed;
 
-    private Pin(
-        final Integer id,
-        final Point location,
-        final String category,
-        final Map<String, String> tags,
-        final Timestamp createTime,
-        final Timestamp updateTime,
-        final boolean removed
+    private Pin(final Integer id,
+                final Point location,
+                final String category,
+                final Map<String, String> tags,
+                final Timestamp createTime,
+                final Timestamp updateTime,
+                final boolean removed
     ) {
         this.id = id;
         this.location = location;
