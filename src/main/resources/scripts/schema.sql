@@ -23,3 +23,12 @@ create or replace trigger set_update_time
     before update on pins
     for each row
     execute function set_update_time();
+
+create or replace function is_subcategory_of(sub text, super text)
+returns boolean
+language sql
+immutable
+returns null on null input
+as $$
+    select sub = super or sub like super || '.%';
+$$;
