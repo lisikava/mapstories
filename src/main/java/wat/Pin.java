@@ -21,7 +21,7 @@ public class Pin {
     private static final String createQuery = """
             insert into pins(location, category, tags)
             values (?, ?, ?)
-            returning id, create_time""";
+            returning id, create_time, update_time""";
 
     private static final String retrieveQuery = """
             with params as (select
@@ -89,21 +89,22 @@ public class Pin {
     ) {
         Integer id = null;
         Timestamp createTime = null;
+        Timestamp updateTime = null;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
             pstmt.setObject(1, Point.asPGpoint(location));
             pstmt.setString(2, category);
             pstmt.setObject(3, makeHStore(tags));
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                if (resultSet.next()) {
-                    id = resultSet.getInt(1);
-                    createTime = resultSet.getTimestamp(2);
-                    if (resultSet.next()) {
-                        throw new SQLException("Insert returned multiple rows");
-                    }
-                } else {
-                    throw new SQLException("Insert returned no rows");
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                id = rs.getInt(1);
+                createTime = rs.getTimestamp(2);
+                updateTime = rs.getTimestamp(3);
+                if (rs.next()) {
+                    throw new SQLException("Insert returned multiple rows");
                 }
+            } else {
+                throw new SQLException("Insert returned no rows");
             }
         } catch (SQLException e) {
             // TODO: exception handling
@@ -114,15 +115,16 @@ public class Pin {
                        category,
                        tags,
                        createTime,
-                       createTime,
+                       updateTime,
                        false
         );
     }
+
     public static List<Pin> retrieve(PinFilter filter) {
         List<Pin> foundPins = new ArrayList<>();
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
-            if(filter.bbox() != null) {
+            if (filter.bbox() != null) {
                 pstmt.setObject(1, BoundingBox.asPGbox(filter.bbox()));
             } else {
                 pstmt.setNull(1, Types.OTHER);
@@ -130,16 +132,12 @@ public class Pin {
             pstmt.setArray(2, conn.createArrayOf("text", filter.categories()));
             pstmt.setArray(3,
                            conn.createArrayOf("text",
-                                              filter.tags()
-                                                      .keySet()
-                                                      .toArray()
+                                              filter.tags().keySet().toArray()
                            )
             );
             pstmt.setArray(4,
                            conn.createArrayOf("text",
-                                              filter.tags()
-                                                      .values()
-                                                      .toArray()
+                                              filter.tags().values().toArray()
                            )
             );
             ResultSet rs = pstmt.executeQuery();
@@ -147,9 +145,7 @@ public class Pin {
             while (rs.next()) {
                 var tags = new TreeMap<String, String>();
                 try {
-                    JSONObject obj = (JSONObject) parser.parse(
-                            rs.getString(4)
-                    );
+                    JSONObject obj = (JSONObject) parser.parse(rs.getString(4));
                     tags = new TreeMap<>();
                     for (Object key : obj.keySet()) {
                         tags.put((String) key, (String) obj.get(key));
@@ -157,14 +153,13 @@ public class Pin {
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                foundPins.add(new Pin(
-                        rs.getInt(1),
-                        new Point(rs.getObject(2, PGpoint.class)),
-                        rs.getString(3),
-                        tags,
-                        rs.getTimestamp(5),
-                        rs.getTimestamp(6),
-                        false
+                foundPins.add(new Pin(rs.getInt(1),
+                                      new Point(rs.getObject(2, PGpoint.class)),
+                                      rs.getString(3),
+                                      tags,
+                                      rs.getTimestamp(5),
+                                      rs.getTimestamp(6),
+                                      false
                 ));
             }
         } catch (SQLException e) {
@@ -185,16 +180,15 @@ public class Pin {
             pstmt.setString(2, category);
             pstmt.setObject(3, makeHStore(tags));
             pstmt.setInt(4, id);
-            try (ResultSet resultSet = pstmt.executeQuery()) {
-                if (resultSet.next()) {
-                    createTime = resultSet.getTimestamp(1);
-                    updateTime = resultSet.getTimestamp(2);
-                    if (resultSet.next()) {
-                        throw new SQLException("Update returned multiple rows");
-                    }
-                } else {
-                    throw new SQLException("Update returned no rows");
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                createTime = rs.getTimestamp(1);
+                updateTime = rs.getTimestamp(2);
+                if (rs.next()) {
+                    throw new SQLException("Update returned multiple rows");
                 }
+            } else {
+                throw new SQLException("Update returned no rows");
             }
         } catch (SQLException e) {
             // TODO: handling
