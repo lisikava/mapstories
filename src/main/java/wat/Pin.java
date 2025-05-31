@@ -1,8 +1,7 @@
 package wat;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.postgresql.geometric.PGpoint;
 
 import javax.sql.DataSource;
@@ -144,28 +143,18 @@ public class Pin {
                            )
             );
             ResultSet rs = pstmt.executeQuery();
-            JSONParser parser = new JSONParser();
+            ObjectMapper objectMapper = new ObjectMapper();
             while (rs.next()) {
-                var tags = new TreeMap<String, String>();
-                try {
-                    JSONObject obj = (JSONObject) parser.parse(rs.getString(4));
-                    tags = new TreeMap<>();
-                    for (Object key : obj.keySet()) {
-                        tags.put((String) key, (String) obj.get(key));
-                    }
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
                 foundPins.add(new Pin(rs.getInt(1),
                                       new Point(rs.getObject(2, PGpoint.class)),
                                       rs.getString(3),
-                                      tags,
+                                      objectMapper.readValue(rs.getString(4), TreeMap.class),
                                       rs.getTimestamp(5),
                                       rs.getTimestamp(6),
                                       false
                 ));
             }
-        } catch (SQLException e) {
+        } catch (SQLException | JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         return foundPins;
