@@ -4,8 +4,7 @@ create table if not exists pins (
     category text not null check (category != ''),
     tags hstore not null,
     create_time timestamptz not null default now(),
-    update_time timestamptz not null default now(),
-    removed boolean not null default false
+    update_time timestamptz not null default now()
 );
 
 create index if not exists pins_location_gist on pins using gist(location);

@@ -36,7 +36,7 @@ public class Pin {
                 pins.update_time
             from pins, params
             where
-                pins.removed = false and (
+                (
                     params.bbox is null or
                     params.bbox @> pins.location
                 ) and (
@@ -68,17 +68,13 @@ public class Pin {
                 category = coalesce(?, category),
                 tags = coalesce(hstore(?, ?), tags)
             where
-                id = ? and
-                removed = false
+                id = ?
             returning create_time, update_time""";
 
     private static final String deleteQuery = """
-            update pins
-            set
-                removed = true
+            delete from pins
             where
-                id = ? and
-                removed = false""";
+                id = ?""";
 
     public static Pin create(final Point location,
                              final String category,
@@ -117,8 +113,7 @@ public class Pin {
                        category,
                        tags,
                        createTime,
-                       updateTime,
-                       false
+                       updateTime
         );
     }
 
@@ -150,8 +145,7 @@ public class Pin {
                                       rs.getString(3),
                                       objectMapper.readValue(rs.getString(4), TreeMap.class),
                                       rs.getTimestamp(5),
-                                      rs.getTimestamp(6),
-                                      false
+                                      rs.getTimestamp(6)
                 ));
             }
         } catch (SQLException | JsonProcessingException e) {
@@ -196,8 +190,7 @@ public class Pin {
                        category,
                        tags,
                        createTime,
-                       updateTime,
-                       false
+                       updateTime
         );
     }
 
@@ -205,7 +198,7 @@ public class Pin {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(deleteQuery);
             pstmt.setInt(1, id);
-            pstmt.execute();
+            pstmt.executeUpdate();
             assert (pstmt.getUpdateCount() == 1);
         } catch (SQLException e) {
             // TODO: handling
@@ -219,15 +212,13 @@ public class Pin {
     private Map<String, String> tags;
     private final Timestamp createTime;
     private Timestamp updateTime;
-    private boolean removed;
 
     private Pin(final Integer id,
                 final Point location,
                 final String category,
                 final Map<String, String> tags,
                 final Timestamp createTime,
-                final Timestamp updateTime,
-                final boolean removed
+                final Timestamp updateTime
     ) {
         this.id = id;
         this.location = location;
@@ -235,11 +226,6 @@ public class Pin {
         this.tags = tags;
         this.createTime = createTime;
         this.updateTime = updateTime;
-        this.removed = removed;
-    }
-
-    public boolean isRemoved() {
-        return removed;
     }
 
     public Integer getId() {
