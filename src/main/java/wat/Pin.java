@@ -4,7 +4,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.postgresql.geometric.PGpoint;
-import org.postgresql.util.PGobject;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 public class Pin {
 
@@ -20,7 +18,7 @@ public class Pin {
 
     private static final String createQuery = """
             insert into pins(location, category, tags)
-            values (?, ?, ?)
+            values (?, ?, hstore(?, ?))
             returning id, create_time, update_time""";
 
     private static final String retrieveQuery = """
@@ -69,7 +67,7 @@ public class Pin {
             set
                 location = coalesce(?, location),
                 category = coalesce(?, category),
-                tags = coalesce(?, tags)
+                tags = coalesce(hstore(?, ?), tags)
             where
                 id = ? and
                 removed = false
@@ -94,7 +92,12 @@ public class Pin {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
             pstmt.setObject(1, Point.asPGpoint(location));
             pstmt.setString(2, category);
-            pstmt.setObject(3, makeHStore(tags));
+            pstmt.setArray(3,
+                           conn.createArrayOf("text", tags.keySet().toArray())
+            );
+            pstmt.setArray(4,
+                           conn.createArrayOf("text", tags.values().toArray())
+            );
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 id = rs.getInt(1);
@@ -178,8 +181,13 @@ public class Pin {
             PreparedStatement pstmt = conn.prepareStatement(updateQuery);
             pstmt.setObject(1, Point.asPGpoint(location));
             pstmt.setString(2, category);
-            pstmt.setObject(3, makeHStore(tags));
-            pstmt.setInt(4, id);
+            pstmt.setArray(3,
+                           conn.createArrayOf("text", tags.keySet().toArray())
+            );
+            pstmt.setArray(4,
+                           conn.createArrayOf("text", tags.values().toArray())
+            );
+            pstmt.setInt(5, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 createTime = rs.getTimestamp(1);
@@ -214,20 +222,6 @@ public class Pin {
             // TODO: handling
             throw new RuntimeException(e);
         }
-    }
-
-    private static PGobject makeHStore(Map<String, String> map)
-    throws SQLException {
-        PGobject obj = new PGobject();
-        obj.setType("hstore");
-        obj.setValue(map.entrySet()
-                             .stream()
-                             .map(tag -> String.format("%1s=>\"%2s\"",
-                                                       tag.getKey(),
-                                                       tag.getValue()
-                             ))
-                             .collect(Collectors.joining(", ")));
-        return obj;
     }
 
     private final Integer id;
