@@ -60,7 +60,7 @@ const addDescriptionHandler = function () {
     descriptionContainer.appendChild(newDescriptionInput);
 };
 
-const submitDescriptionHandler = function () {
+const submitDescriptionHandler = async function () {
     const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
     let hasEmptyFields = false;
 
@@ -86,7 +86,7 @@ const submitDescriptionHandler = function () {
     });
 
     if (hasEmptyFields) {
-        alert('Please fill in all fields before submitting');
+        // alert('Please fill in all fields before submitting');
         return;
     }
 
@@ -100,8 +100,29 @@ const submitDescriptionHandler = function () {
 
     let popupContent = buildPopUpContent(currentPinTagsAndDescriptions);
     currentPin.bindPopup(popupContent).openPopup();
+
+    const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
+    const category = categoryObj ? categoryObj.description : "";
+    const tags = {};
+    currentPinTagsAndDescriptions.forEach(pair => {
+        if (pair.tag !== "Category") {
+            tags[pair.tag] = pair.description;
+        }
+    });
+
+    const pinData = { location: { lat: currentPin.getLatLng().lat, lon: currentPin.getLatLng().lng }, category, tags };
+    const response = await fetch('/pins', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(pinData)
+    }).catch(error => {
+        console.error(error);
+    });
+    const result = await response.json();
     placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
-    
+
     pinsDescriptionContainer.classList.add('hidden');
     currentPin = null;
     formOpen = false;
