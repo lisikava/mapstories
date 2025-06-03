@@ -76,7 +76,7 @@ public class Pin {
             where
                 id = ?""";
 
-    public static Pin create(final Point location,
+    public static Pin create(final PGpoint location,
                              final String category,
                              final Map<String, String> tags
     ) {
@@ -85,7 +85,7 @@ public class Pin {
         Timestamp updateTime = null;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(createQuery);
-            pstmt.setObject(1, Point.asPGpoint(location));
+            pstmt.setObject(1, location);
             pstmt.setString(2, category);
             pstmt.setArray(3,
                            conn.createArrayOf("text", tags.keySet().toArray())
@@ -122,7 +122,7 @@ public class Pin {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
             if (filter.bbox() != null) {
-                pstmt.setObject(1, BoundingBox.asPGbox(filter.bbox()));
+                pstmt.setObject(1, filter.bbox());
             } else {
                 pstmt.setNull(1, Types.OTHER);
             }
@@ -141,7 +141,7 @@ public class Pin {
             ObjectMapper objectMapper = new ObjectMapper();
             while (rs.next()) {
                 foundPins.add(new Pin(rs.getInt(1),
-                                      new Point(rs.getObject(2, PGpoint.class)),
+                                      rs.getObject(2, PGpoint.class),
                                       rs.getString(3),
                                       objectMapper.readValue(rs.getString(4), TreeMap.class),
                                       rs.getTimestamp(5),
@@ -155,14 +155,14 @@ public class Pin {
     }
 
     public static Pin update(Integer id,
-                             Point location,
+                             PGpoint location,
                              String category,
                              Map<String, String> tags
     ) {
         Timestamp createTime, updateTime;
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(updateQuery);
-            pstmt.setObject(1, Point.asPGpoint(location));
+            pstmt.setObject(1, location);
             pstmt.setString(2, category);
             pstmt.setArray(3,
                            conn.createArrayOf("text", tags.keySet().toArray())
@@ -207,14 +207,14 @@ public class Pin {
     }
 
     private final Integer id;
-    private Point location;
+    private PGpoint location;
     private String category;
     private Map<String, String> tags;
     private final Timestamp createTime;
     private Timestamp updateTime;
 
     private Pin(final Integer id,
-                final Point location,
+                final PGpoint location,
                 final String category,
                 final Map<String, String> tags,
                 final Timestamp createTime,
@@ -232,11 +232,11 @@ public class Pin {
         return id;
     }
 
-    public Point getLocation() {
+    public PGpoint getLocation() {
         return location;
     }
 
-    public void setLocation(final Point location) {
+    public void setLocation(final PGpoint location) {
         this.location = location;
     }
 

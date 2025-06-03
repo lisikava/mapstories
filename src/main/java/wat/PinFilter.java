@@ -1,9 +1,11 @@
 package wat;
 
+import org.postgresql.geometric.PGbox;
+
 import java.util.Map;
 
 public record PinFilter(
-    BoundingBox bbox,
+    PGbox bbox,
     String[] categories,
     Map<String, String> tags
 ) {}
