@@ -208,7 +208,7 @@ async function loadPins() {
         const response = await fetch('/pins');
         const pins = await response.json();
         pins.forEach(pin => {
-            const marker = L.marker([pin.location.lat, pin.location.lon], { icon: pinIcon }).addTo(map);
+            const marker = L.marker([pin.location.x, pin.location.y], { icon: pinIcon }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
