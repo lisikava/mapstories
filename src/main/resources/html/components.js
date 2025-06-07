@@ -98,7 +98,7 @@ const submitDescriptionHandler = async function () {
         return { tag: tag, description: description };
     });
 
-    let popupContent = buildPopUpContent(currentPinTagsAndDescriptions);
+    let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.indexOf(currentPin));
     currentPin.bindPopup(popupContent).openPopup();
 
     const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
@@ -137,7 +137,7 @@ const cancelDescriptionHandler = function () {
     removeListeners();
 };
 
-function buildPopUpContent(tagsAndDescriptions) {
+function buildPopUpContent(tagsAndDescriptions, pinIndex) {
     const container = document.createElement('div');
     tagsAndDescriptions.forEach(pair => {
         const tagElement = document.createElement('b');
@@ -150,7 +150,52 @@ function buildPopUpContent(tagsAndDescriptions) {
         container.appendChild(lineDiv);
         container.appendChild(hr);
     });
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.display = 'flex';
+    buttonContainer.style.justifyContent = 'flex-end';
+    buttonContainer.style.gap = '8px';
+
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.className = 'pin-edit-button';
+    editButton.dataset.pinIndex = pinIndex;
+    buttonContainer.appendChild(editButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.className = 'pin-delete-button';
+    deleteButton.dataset.pinIndex = pinIndex;
+    buttonContainer.appendChild(deleteButton);
+
+    container.appendChild(buttonContainer);
     return container;
+}
+
+function setupPopupButtonEvents(marker, pinIndex) {
+    marker.on('popupopen', function () {
+        const popupElem = document.querySelector('.leaflet-popup-content');
+        if (!popupElem) return;
+        const editBtn = popupElem.querySelector('.pin-edit-button');
+        const deleteBtn = popupElem.querySelector('.pin-delete-button');
+        if (editBtn) {
+            editBtn.onclick = function () {
+                startEditPin(pinIndex);
+            };
+        }
+        if (deleteBtn) {
+            deleteBtn.onclick = function () {
+                deletePin(pinIndex);
+            };
+        }
+    });
+}
+
+function EditPin(pinIndex) {
+    alert('Edit pin ' + pinIndex);
+}
+
+function deletePin(pinIndex) {
+    alert('Delete pin ' + pinIndex);
 }
 
 function displayPinContent(tagsAndDescriptions) {
@@ -213,7 +258,7 @@ async function loadPins() {
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
             ];
-            popupContent = buildPopUpContent(tagsAndDescriptions);
+            popupContent = buildPopUpContent(tagsAndDescriptions, placedPins.indexOf(currentPin));
             marker.bindPopup(popupContent);
             placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions });
         });
