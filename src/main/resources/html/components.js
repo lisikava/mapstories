@@ -35,7 +35,8 @@ const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
 
 let currentPin;
-let formOpen = false;
+let createFormOpen = false;
+let editFormOpen = false;
 const allDescriptions = [];
 const placedPins = [];
 
@@ -86,7 +87,6 @@ const submitDescriptionHandler = async function () {
     });
 
     if (hasEmptyFields) {
-        // alert('Please fill in all fields before submitting');
         return;
     }
 
@@ -125,7 +125,7 @@ const submitDescriptionHandler = async function () {
 
     pinsDescriptionContainer.classList.add('hidden');
     currentPin = null;
-    formOpen = false;
+    createFormOpen = false;
     removeListeners();
 };
 
@@ -133,7 +133,7 @@ const cancelDescriptionHandler = function () {
     map.removeLayer(currentPin);
     pinsDescriptionContainer.classList.add('hidden');
     currentPin = null;
-    formOpen = false;
+    createFormOpen = false;
     removeListeners();
 };
 
@@ -175,15 +175,15 @@ function setupPopupButtonEvents(marker, pinIndex) {
     marker.on('popupopen', function () {
         const popupElem = document.querySelector('.leaflet-popup-content');
         if (!popupElem) return;
-        const editBtn = popupElem.querySelector('.pin-edit-button');
-        const deleteBtn = popupElem.querySelector('.pin-delete-button');
-        if (editBtn) {
-            editBtn.onclick = function () {
-                startEditPin(pinIndex);
+        const editButton = popupElem.querySelector('.pin-edit-button');
+        const deleteButton = popupElem.querySelector('.pin-delete-button');
+        if (editButton) {
+            editButton.onclick = function () {
+                EditPin(pinIndex);
             };
         }
-        if (deleteBtn) {
-            deleteBtn.onclick = function () {
+        if (deleteButton) {
+            deleteButton.onclick = function () {
                 deletePin(pinIndex);
             };
         }
@@ -191,7 +191,28 @@ function setupPopupButtonEvents(marker, pinIndex) {
 }
 
 function EditPin(pinIndex) {
-    alert('Edit pin ' + pinIndex);
+    editFormOpen = true;
+    const pinInfo = placedPins[pinIndex];
+    const tagsAndDescriptions = pinInfo.tagsAndDescriptions;
+    if (!pinInfo) return;
+    pinsDescriptionContainer.classList.remove('hidden');
+    createFormOpen = true;
+    currentPin = pinInfo.pin;
+
+    descriptionContainer.innerHTML = '';
+    if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
+        tagsAndDescriptions.forEach(pair => {
+            const descriptionDiv = document.createElement('div');
+            descriptionDiv.classList.add('description-input-group');
+            descriptionDiv.classList.add('description-input-group');
+            descriptionDiv.innerHTML = `
+                <input type="text" class="tag-input" value="${pair.tag}" ${pair.tag === "Category" ? "disabled" : ""}>
+                <input type="text" class="description-input" value="${pair.description}">
+            `;
+            descriptionContainer.appendChild(descriptionDiv);
+        });
+    }
+    addListeners();
 }
 
 function deletePin(pinIndex) {
@@ -222,8 +243,9 @@ map.on('click', function (e) {
         }
     });
 
-    if (!pinClicked && !formOpen) {
-        formOpen = true;
+    if (!pinClicked && !createFormOpen) {
+        createFormOpen = true;
+        editFormOpen = false;
         pinsDescriptionContainer.classList.remove('hidden');
         descriptionContainer.innerHTML = `
                     <div class="description-input-group category-input-group">
@@ -236,10 +258,10 @@ map.on('click', function (e) {
         descriptionContainer.scrollTop = 0;
         currentPin = L.marker(e.latlng, { icon: pinIcon }).addTo(map);
         addListeners();
-    } else if (!pinClicked && formOpen) {
+    } else if (!pinClicked && createFormOpen) {
         pinsDescriptionContainer.classList.add('hidden');
-        formOpen = false;
-        if (currentPin) {
+        createFormOpen = false;
+        if (currentPin && !editFormOpen) {
             map.removeLayer(currentPin);
             currentPin = null;
             removeListeners();
@@ -252,15 +274,16 @@ async function loadPins() {
     try {
         const response = await fetch('/pins');
         const pins = await response.json();
-        pins.forEach(pin => {
+        pins.forEach((pin, idx) => {
             const marker = L.marker([pin.location.x, pin.location.y], { icon: pinIcon }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
             ];
-            popupContent = buildPopUpContent(tagsAndDescriptions, placedPins.indexOf(currentPin));
+            popupContent = buildPopUpContent(tagsAndDescriptions, idx);
             marker.bindPopup(popupContent);
             placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions });
+            setupPopupButtonEvents(marker, idx);
         });
     } catch (error) {
         console.error('Failed to load pins:', error);
