@@ -33,6 +33,7 @@ const descriptionContainer = document.getElementById('description-container');
 const addCellButton = document.getElementById('add-cell');
 const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
+const searchButton = document.getElementById('lasso-wrap');
 
 let currentPin;
 let createFormOpen = false;
@@ -71,6 +72,10 @@ const submitDescriptionHandler = async function () {
             input.classList.remove('error');
         });
     });
+
+    const searchHandler = async function(){
+        console.log('Search');
+    }
 
     descriptionGroups.forEach(group => {
         const tagInput = group.querySelector('.tag-input');

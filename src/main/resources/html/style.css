@@ -69,6 +69,10 @@ body {
     line-height: 1.1;
     text-align: left;
     color: var(--color-creme);
+    background-color:  transparent;
+    border:  none;
+    outline: none;
+    max-width: 8.5vw;
   }
   
   .lasso-border {
