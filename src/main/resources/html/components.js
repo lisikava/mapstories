@@ -100,6 +100,7 @@ const submitDescriptionHandler = async function () {
 
     let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.indexOf(currentPin));
     currentPin.bindPopup(popupContent).openPopup();
+    setupPopupButtonEvents(currentPin, placedPins.indexOf(currentPin));
 
     const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
     const category = categoryObj ? categoryObj.description : "";
@@ -130,10 +131,13 @@ const submitDescriptionHandler = async function () {
 };
 
 const cancelDescriptionHandler = function () {
-    map.removeLayer(currentPin);
+    if (createFormOpen && !editFormOpen) {
+        map.removeLayer(currentPin);
+        currentPin = null;
+    }
     pinsDescriptionContainer.classList.add('hidden');
-    currentPin = null;
     createFormOpen = false;
+    editFormOpen = false;
     removeListeners();
 };
 
@@ -216,7 +220,13 @@ function EditPin(pinIndex) {
 }
 
 function deletePin(pinIndex) {
-    alert('Delete pin ' + pinIndex);
+    /*const pinInfo = placedPins[pinIndex];
+    if (!pinInfo) return;
+    map.removeLayer(pinInfo.pin);
+    placedPins.splice(pinIndex, 1);
+    pinsDescriptionContainer.classList.add('hidden');
+    map.closePopup();*/
+    map.closePopup();
 }
 
 function displayPinContent(tagsAndDescriptions) {
