@@ -225,12 +225,7 @@ function EditPin(pinIndex) {
 }
 
 function deletePin(pinIndex) {
-    /*const pinInfo = placedPins[pinIndex];
-    if (!pinInfo) return;
-    map.removeLayer(pinInfo.pin);
-    placedPins.splice(pinIndex, 1);
-    pinsDescriptionContainer.classList.add('hidden');
-    map.closePopup();*/
+    confirm("Are you sure want to remove this pin?");
     map.closePopup();
 }
 
