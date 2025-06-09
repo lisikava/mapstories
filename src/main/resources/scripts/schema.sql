@@ -7,6 +7,12 @@ create table if not exists pins (
     update_time timestamptz not null default now()
 );
 
+create table if not exists subscriptions (
+    id bigint primary key generated always as identity,
+    email text not null check (email != ''),
+    pattern jsonb not null check (pattern is json object)
+);
+
 create index if not exists pins_location_gist on pins using gist(location);
 create index if not exists pins_category_idx on pins(category);
 create index if not exists pins_tags_gin on pins using gin(tags);
