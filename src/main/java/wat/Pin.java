@@ -21,11 +21,15 @@ public class Pin {
             returning id, create_time, update_time""";
 
     private static final String retrieveQuery = """
-            with params as (select
-                ? as bbox,
-                ? as categories,
-                ? as keys,
-                ? as values
+            with pattern as (select
+                to_jsonb(?) as pattern
+            ),
+            params as (
+                select
+                    (pattern->>'bbox')::box as bbox,
+                    pattern->'categories' as categories,
+                    pattern->'tags' as tags
+                from pattern
             )
             select
                 pins.id,
@@ -43,15 +47,14 @@ public class Pin {
                     params.categories is null or
                     exists (
                         select 1
-                        from unnest(params.categories) super
+                        from jsonb_array_elements_text(params.categories) super
                         where is_subcategory_of(pins.category, super)
                     )
                 ) and (
-                    params.keys is null or
-                    cardinality(params.keys) = 0 or
+                    params.tags is null or
                     not exists (
                         select 1
-                        from unnest(keys, values) as tag(key, value)
+                        from jsonb_each_text(params.tags) as tag
                         where not (
                             exist(pins.tags, tag.key) and (
                                 tag.value is null or
@@ -59,7 +62,8 @@ public class Pin {
                             )
                         )
                     )
-                )""";
+                )
+            ;""";
 
     private static final String updateQuery = """
             update pins
@@ -108,42 +112,23 @@ public class Pin {
             // TODO: exception handling
             throw new RuntimeException(e);
         }
-        return new Pin(id,
-                       location,
-                       category,
-                       tags,
-                       createTime,
-                       updateTime
-        );
+        return new Pin(id, location, category, tags, createTime, updateTime);
     }
 
-    public static List<Pin> retrieve(PinFilter filter) {
+    public static List<Pin> retrieve(String pattern) {
         List<Pin> foundPins = new ArrayList<>();
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
-            if (filter.bbox() != null) {
-                pstmt.setObject(1, filter.bbox());
-            } else {
-                pstmt.setNull(1, Types.OTHER);
-            }
-            pstmt.setArray(2, conn.createArrayOf("text", filter.categories()));
-            pstmt.setArray(3,
-                           conn.createArrayOf("text",
-                                              filter.tags().keySet().toArray()
-                           )
-            );
-            pstmt.setArray(4,
-                           conn.createArrayOf("text",
-                                              filter.tags().values().toArray()
-                           )
-            );
-            ResultSet rs = pstmt.executeQuery();
             ObjectMapper objectMapper = new ObjectMapper();
+            pstmt.setString(1, pattern);
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 foundPins.add(new Pin(rs.getInt(1),
                                       rs.getObject(2, PGpoint.class),
                                       rs.getString(3),
-                                      objectMapper.readValue(rs.getString(4), TreeMap.class),
+                                      objectMapper.readValue(rs.getString(4),
+                                                             TreeMap.class
+                                      ),
                                       rs.getTimestamp(5),
                                       rs.getTimestamp(6)
                 ));
@@ -185,13 +170,7 @@ public class Pin {
             // TODO: handling
             throw new RuntimeException(e);
         }
-        return new Pin(id,
-                       location,
-                       category,
-                       tags,
-                       createTime,
-                       updateTime
-        );
+        return new Pin(id, location, category, tags, createTime, updateTime);
     }
 
     public static void delete(Integer id) {

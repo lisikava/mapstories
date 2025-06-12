@@ -16,10 +16,7 @@ public class PinController {
     }
 
     private void getAllPins(Context ctx) {
-        List<Pin> pins = Pin.retrieve(new PinFilter(new PGbox(0, 0, 60, 60),
-                                                    null,
-                                                    Map.of()
-        ));
+        List<Pin> pins = Pin.retrieve("{\"bbox\": \"(0, 0), (60.0, 60.0)\", \"categories\": null, \"tags\": {\"description\":null}}");
         ctx.json(pins);
     }
 

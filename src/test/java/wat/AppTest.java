@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
+
 import org.junit.jupiter.api.Test;
 import org.postgresql.geometric.PGbox;
 import org.postgresql.geometric.PGpoint;
@@ -27,12 +28,10 @@ public class AppTest {
 
     @Test
     public void pinRetrievalTest() {
-        init();
+//        init();
         assertDoesNotThrow(() -> {
             var pins = Pin.retrieve(
-                new PinFilter(new PGbox(60, 60, 40, 40),
-                              new String[] { "story" }, Map.of())
-            );
+                    "{\"bbox\": \"(40.0, 10.0), (60.0, 30.0)\", \"categories\": [\"event\", \"report\"], \"tags\": {\"description\": null}}");
             System.out.println("Did not throw, found " + pins.size() + " pins");
             verbose(pins.get(0));
         });
