@@ -10,6 +10,7 @@ create table if not exists pins (
 create table if not exists subscriptions (
     id bigint primary key generated always as identity,
     email text not null check (email != ''),
+    tz_offset int not null check (tz_offset between 0 and 1439),
     pattern jsonb not null check (pattern is json object)
 );
 
