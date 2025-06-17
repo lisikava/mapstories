@@ -13,7 +13,8 @@ import java.util.TreeMap;
 
 public class Pin {
 
-    private static final DataSource dataSource = DataSourceProvider.getDataSource();
+    private static final DataSource dataSource =
+            DataSourceProvider.getDataSource();
 
     private static final String createQuery = """
             insert into pins(location, category, tags)
@@ -186,11 +187,11 @@ public class Pin {
     }
 
     private final Integer id;
-    private PGpoint location;
-    private String category;
-    private Map<String, String> tags;
+    private final PGpoint location;
+    private final String category;
+    private final Map<String, String> tags;
     private final Timestamp createTime;
-    private Timestamp updateTime;
+    private final Timestamp updateTime;
 
     private Pin(final Integer id,
                 final PGpoint location,
@@ -215,24 +216,8 @@ public class Pin {
         return location;
     }
 
-    public void setLocation(final PGpoint location) {
-        this.location = location;
-    }
-
     public String getCategory() {
         return category;
-    }
-
-    public void setCategory(final String category) {
-        this.category = category;
-    }
-
-    public Map<String, String> getTags() {
-        return new TreeMap<String, String>(tags);
-    }
-
-    public void setTags(final Map<String, String> tags) {
-        this.tags = new TreeMap<String, String>(tags);
     }
 
     public Timestamp getCreateTime() {
@@ -243,7 +228,7 @@ public class Pin {
         return updateTime;
     }
 
-    public void setUpdateTime(Timestamp updateTime) {
-        this.updateTime = updateTime;
+    public Map<String, String> getTags() {
+        return new TreeMap<>(tags);
     }
 }
