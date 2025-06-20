@@ -49,7 +49,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-.simple-search-text {
+.search-text {
   position: absolute;
   left: -70px;
   bottom: 15px;
@@ -126,7 +126,7 @@ body {
   transition: .6s opacity cubic-bezier(.77, 0, .175, 1) .1s;
 }
 
-svg.simple-search-svg {
+svg.advanced-svg {
   position: absolute;
   width: 40px;
   left: -12px;
