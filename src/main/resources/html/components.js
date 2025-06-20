@@ -415,7 +415,7 @@ async function loadPins() {
 }
 
 function openSearchForm() {
-    const advancedButton = document.querySelector('.search-button');
+    const advancedButton = document.querySelector('.search-buttons-container');
     
     if (searchFormOpen) {
         searchFormContainer.classList.add('hidden');
@@ -437,7 +437,7 @@ function openSearchForm() {
 }
 
 function closeSearchForm() {
-    const advancedButton = document.querySelector('.search-button');
+    const advancedButton = document.querySelector('.search-buttons-container');
     
     searchFormContainer.classList.add('hidden');
     advancedButton.classList.remove('active');
@@ -457,17 +457,35 @@ searchCancelButton.addEventListener('click', closeSearchForm);
 searchSubmitButton.addEventListener('click', handleSearchSubmit);
 
 document.addEventListener('DOMContentLoaded', function() {
-    const advancedButton = document.querySelector('.search-button');
+    const advancedButton = document.querySelector('.search-buttons-container');
     if (advancedButton) {
         advancedButton.addEventListener('click', openSearchForm);
     }
 });
 
 
-document.querySelector(".advanced-svg").addEventListener("click", () =>{console.log("Pressed")});
+document.querySelector(".simple-search-svg").addEventListener("click", (event) => {
+    event.stopPropagation();
+    console.log("Search pressed");
+});
+
+document.querySelector(".simple-search-text").addEventListener("click", (event) => {
+    event.stopPropagation();
+});
+
+document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});
+
 
 const  followText = document.querySelector(".follow");
 followText.addEventListener("click", () =>{
     const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");
+    const emailButtonOutline = document.querySelector(".email-button-outline");
     searchInputOutline.classList.toggle("hidden");
+    emailButtonOutline.classList.toggle("hidden");
 });
+
+// const  followText = document.querySelector(".follow");
+// followText.addEventListener("click", () =>{
+//     const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");
+//     searchInputOutline.classList.toggle("hidden");
+// });

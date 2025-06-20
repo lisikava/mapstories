@@ -49,7 +49,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-.search-text {
+.simple-search-text {
   position: absolute;
   left: -70px;
   bottom: 15px;
@@ -126,7 +126,7 @@ body {
   transition: .6s opacity cubic-bezier(.77, 0, .175, 1) .1s;
 }
 
-svg.advanced-svg {
+svg.simple-search-svg {
   position: absolute;
   width: 40px;
   left: -12px;
@@ -254,15 +254,7 @@ border-radius: 5px;
 }
 
 .hidden{
-display: none;
-}
-
-#search-form-container.hidden {
-display: block;
-}
-
-#pins-description-container.hidden {
-display: block;
+display: none !important;
 }
 
 #search-form-container {
@@ -356,3 +348,26 @@ color: var(--color-black);
 background-color: #b44d2d;
 color: var(--color-black);
 }
+
+.email-button-outline {
+  padding: 10px 12px;
+  background-color: var(--color-blue);
+  color: var(--color-black);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  min-width: 44px;
+  height: 44px;
+  }
+  
+  .email-button-outline:hover {
+  background-color: #007a91;
+  }
+  
+  .email-button svg {
+  color: var(--color-black);
+  }

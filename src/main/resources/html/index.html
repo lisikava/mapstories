@@ -6,7 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE-edge">
     <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
     <title>MapStories</title>
-    <!-- Include leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -20,8 +19,8 @@
     <nav>
         <div class="app-name">MapStories</div>
         <div class="search-buttons-container">
-            <input class="search-text" type="text" placeholder="Search"/>
-                <svg class="advanced-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24">
+            <input class="simple-search-text" type="text" placeholder="Search"/>
+                <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24">
                     <circle cx="17" cy="10" r="6" fill="none" stroke="#d8791f" stroke-width="1"/>
                     <line x1="14" y1="15.2" x2="10" y2="21" stroke="#d8791f" stroke-width="1" stroke-linecap="round"/>
                 </svg>
@@ -73,6 +72,12 @@
             <div class="search-section-header follow">Follow</div>
             <div class="search-input-row">
                 <input type="text" class="search-input-outline hidden" placeholder="Enter your email">
+                <button type="button" class="email-button-outline hidden">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button> 
             </div>
         </div>
         
