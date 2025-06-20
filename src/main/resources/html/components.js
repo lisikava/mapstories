@@ -62,24 +62,95 @@ const addDescriptionHandler = function () {
     descriptionContainer.appendChild(newDescriptionInput);
 };
 
+// const submitDescriptionHandler = async function () {
+//     const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
+//     let hasEmptyFields = false;
+
+//     descriptionGroups.forEach(group => {
+//         const inputs = group.querySelectorAll('input');
+//         inputs.forEach(input => {
+//             input.classList.remove('error');
+//         });
+//     });
+
+//     const searchHandler = async function(){
+//         console.log('Search');
+//     }
+
+//     descriptionGroups.forEach(group => {
+//         const tagInput = group.querySelector('.tag-input');
+//         const descriptionInput = group.querySelector('.description-input');
+        
+//         if (!tagInput.disabled && tagInput.value.trim() === '') {
+//             tagInput.classList.add('error');
+//             hasEmptyFields = true;
+//         }
+//         if (descriptionInput.value.trim() === '') {
+//             descriptionInput.classList.add('error');
+//             hasEmptyFields = true;
+//         }
+//     });
+
+//     if (hasEmptyFields) {
+//         return;
+//     }
+
+//     const currentPinTagsAndDescriptions = Array.from(descriptionGroups).map(pair => {
+//         const tagInput = pair.querySelector('.tag-input');
+//         const descriptionInput = pair.querySelector('.description-input');
+//         const tag = tagInput.value.trim();
+//         const description = descriptionInput.value.trim();
+//         return { tag: tag, description: description };
+//     });
+
+//     let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.indexOf(currentPin));
+//     currentPin.bindPopup(popupContent).openPopup();
+//     setupPopupButtonEvents(currentPin, placedPins.indexOf(currentPin));
+
+//     const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
+//     const category = categoryObj ? categoryObj.description : "";
+//     const tags = {};
+//     currentPinTagsAndDescriptions.forEach(pair => {
+//         if (pair.tag !== "Category") {
+//             tags[pair.tag] = pair.description;
+//         }
+//     });
+
+//     const pinData = { location: { lat: currentPin.getLatLng().lat, lon: currentPin.getLatLng().lng }, category, tags };
+//     const response = await fetch('/pins', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(pinData)
+//     }).catch(error => {
+//         console.error(error);
+//     });
+//     const result = await response.json();
+//     placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
+
+//     pinsDescriptionContainer.classList.add('hidden');
+//     currentPin = null;
+//     createFormOpen = false;
+//     removeListeners();
+// };
 const submitDescriptionHandler = async function () {
+    if (editFormOpen) {
+        await submitEditHandler();
+    } else {
+        await submitCreateHandler();
+    }
+};
+
+const submitCreateHandler = async function () {
     const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
     let hasEmptyFields = false;
 
     descriptionGroups.forEach(group => {
-        const inputs = group.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.classList.remove('error');
-        });
-    });
-
-    const searchHandler = async function(){
-        console.log('Search');
-    }
-
-    descriptionGroups.forEach(group => {
         const tagInput = group.querySelector('.tag-input');
         const descriptionInput = group.querySelector('.description-input');
+        tagInput.classList.remove('error');
+        descriptionInput.classList.remove('error');
         
         if (!tagInput.disabled && tagInput.value.trim() === '') {
             tagInput.classList.add('error');
@@ -103,10 +174,6 @@ const submitDescriptionHandler = async function () {
         return { tag: tag, description: description };
     });
 
-    let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.indexOf(currentPin));
-    currentPin.bindPopup(popupContent).openPopup();
-    setupPopupButtonEvents(currentPin, placedPins.indexOf(currentPin));
-
     const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
     const category = categoryObj ? categoryObj.description : "";
     const tags = {};
@@ -117,23 +184,116 @@ const submitDescriptionHandler = async function () {
     });
 
     const pinData = { location: { lat: currentPin.getLatLng().lat, lon: currentPin.getLatLng().lng }, category, tags };
-    const response = await fetch('/pins', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pinData)
-    }).catch(error => {
-        console.error(error);
-    });
-    const result = await response.json();
-    placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
+        try {
+        const response = await fetch('/pins', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(pinData)
+        });
+        const result = await response.json();
+
+        placedPins.push({
+            pin: currentPin,
+            tagsAndDescriptions: currentPinTagsAndDescriptions,
+            id: result.id
+        });
+
+        let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.length - 1);
+        currentPin.bindPopup(popupContent).openPopup();
+        setupPopupButtonEvents(currentPin, placedPins.length - 1);
+    } catch (err) {
+        console.error('Failed to create pin:', err);
+    }
 
     pinsDescriptionContainer.classList.add('hidden');
     currentPin = null;
     createFormOpen = false;
     removeListeners();
 };
+
+const submitEditHandler = async function () {
+    const pinInfo = placedPins.find(info => info.pin === currentPin);
+    if (!pinInfo || pinInfo.id === undefined) {
+        console.error("Cannot edit pin: no ID found.");
+        return;
+    }
+
+    const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
+    let hasEmptyFields = false;
+
+    descriptionGroups.forEach(group => {
+        const tagInput = group.querySelector('.tag-input');
+        const descriptionInput = group.querySelector('.description-input');
+        tagInput.classList.remove('error');
+        descriptionInput.classList.remove('error');
+
+        if (!tagInput.disabled && tagInput.value.trim() === '') {
+            tagInput.classList.add('error');
+            hasEmptyFields = true;
+        }
+        if (descriptionInput.value.trim() === '') {
+            descriptionInput.classList.add('error');
+            hasEmptyFields = true;
+        }
+    });
+
+    if (hasEmptyFields) return;
+
+    const updatedTagsAndDescriptions = Array.from(descriptionGroups).map(pair => {
+        return {
+            tag: pair.querySelector('.tag-input').value.trim(),
+            description: pair.querySelector('.description-input').value.trim()
+        };
+    });
+
+    const categoryObj = updatedTagsAndDescriptions.find(pair => pair.tag === "Category");
+    const category = categoryObj ? categoryObj.description : "";
+    const tags = {};
+    updatedTagsAndDescriptions.forEach(pair => {
+        if (pair.tag !== "Category") {
+            tags[pair.tag] = pair.description;
+        }
+    });
+
+    const updateData = {
+        id: pinInfo.id,
+        location: {
+            lat: currentPin.getLatLng().lat,
+            lon: currentPin.getLatLng().lng
+        },
+        category,
+        tags
+    };
+
+    try {
+        const response = await fetch(`/pins/${pinInfo.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+            pinInfo.tagsAndDescriptions = updatedTagsAndDescriptions;
+            const newPopup = buildPopUpContent(updatedTagsAndDescriptions, placedPins.indexOf(pinInfo));
+            currentPin.bindPopup(newPopup).openPopup();
+        } else {
+            console.error("Failed to update pin.");
+        }
+    } catch (err) {
+        console.error('Error during pin update:', err);
+    }
+
+    pinsDescriptionContainer.classList.add('hidden');
+    currentPin = null;
+    createFormOpen = false;
+    editFormOpen = false;
+    removeListeners();
+};
+
 
 const cancelDescriptionHandler = function () {
     if (createFormOpen && !editFormOpen) {
@@ -292,7 +452,7 @@ async function loadPins() {
             ];
             popupContent = buildPopUpContent(tagsAndDescriptions, idx);
             marker.bindPopup(popupContent);
-            placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions });
+            placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions, id: pin.id });
             setupPopupButtonEvents(marker, idx);
         });
     } catch (error) {
