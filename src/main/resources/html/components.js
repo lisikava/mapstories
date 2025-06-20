@@ -62,78 +62,6 @@ const addDescriptionHandler = function () {
     descriptionContainer.appendChild(newDescriptionInput);
 };
 
-// const submitDescriptionHandler = async function () {
-//     const descriptionGroups = descriptionContainer.querySelectorAll('.description-input-group');
-//     let hasEmptyFields = false;
-
-//     descriptionGroups.forEach(group => {
-//         const inputs = group.querySelectorAll('input');
-//         inputs.forEach(input => {
-//             input.classList.remove('error');
-//         });
-//     });
-
-//     const searchHandler = async function(){
-//         console.log('Search');
-//     }
-
-//     descriptionGroups.forEach(group => {
-//         const tagInput = group.querySelector('.tag-input');
-//         const descriptionInput = group.querySelector('.description-input');
-        
-//         if (!tagInput.disabled && tagInput.value.trim() === '') {
-//             tagInput.classList.add('error');
-//             hasEmptyFields = true;
-//         }
-//         if (descriptionInput.value.trim() === '') {
-//             descriptionInput.classList.add('error');
-//             hasEmptyFields = true;
-//         }
-//     });
-
-//     if (hasEmptyFields) {
-//         return;
-//     }
-
-//     const currentPinTagsAndDescriptions = Array.from(descriptionGroups).map(pair => {
-//         const tagInput = pair.querySelector('.tag-input');
-//         const descriptionInput = pair.querySelector('.description-input');
-//         const tag = tagInput.value.trim();
-//         const description = descriptionInput.value.trim();
-//         return { tag: tag, description: description };
-//     });
-
-//     let popupContent = buildPopUpContent(currentPinTagsAndDescriptions, placedPins.indexOf(currentPin));
-//     currentPin.bindPopup(popupContent).openPopup();
-//     setupPopupButtonEvents(currentPin, placedPins.indexOf(currentPin));
-
-//     const categoryObj = currentPinTagsAndDescriptions.find(pair => pair.tag === "Category");
-//     const category = categoryObj ? categoryObj.description : "";
-//     const tags = {};
-//     currentPinTagsAndDescriptions.forEach(pair => {
-//         if (pair.tag !== "Category") {
-//             tags[pair.tag] = pair.description;
-//         }
-//     });
-
-//     const pinData = { location: { lat: currentPin.getLatLng().lat, lon: currentPin.getLatLng().lng }, category, tags };
-//     const response = await fetch('/pins', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify(pinData)
-//     }).catch(error => {
-//         console.error(error);
-//     });
-//     const result = await response.json();
-//     placedPins.push({ pin: currentPin, tagsAndDescriptions: currentPinTagsAndDescriptions });
-
-//     pinsDescriptionContainer.classList.add('hidden');
-//     currentPin = null;
-//     createFormOpen = false;
-//     removeListeners();
-// };
 const submitDescriptionHandler = async function () {
     if (editFormOpen) {
         await submitEditHandler();
@@ -294,7 +222,6 @@ const submitEditHandler = async function () {
     removeListeners();
 };
 
-
 const cancelDescriptionHandler = function () {
     if (createFormOpen && !editFormOpen) {
         map.removeLayer(currentPin);
@@ -384,9 +311,29 @@ function EditPin(pinIndex) {
     addListeners();
 }
 
-function deletePin(pinIndex) {
-    confirm("Are you sure want to remove this pin?");
-    map.closePopup();
+async function deletePin(pinIndex) {
+    const confirmed = confirm("Are you sure want to remove this pin?");
+    if (!confirmed) return;
+    const pinInfo = placedPins[pinIndex];
+    try {
+        const response = await fetch(`/pins/${pinInfo.id}`, {
+            method: 'DELETE',
+        });
+        if (response.ok) {
+            map.removeLayer(pinInfo.pin);
+            placedPins.splice(pinIndex, 1);
+            placedPins.forEach((info, index) => {
+                const newPopup = buildPopUpContent(info.tagsAndDescriptions, index);
+                info.pin.bindPopup(newPopup);
+                setupPopupButtonEvents(info.pin, index);
+            });
+            map.closePopup();
+        } else {
+            console.error("Failed to delete pin.");
+        }
+    } catch (err) {
+        console.error("Error deleting pin:", err);
+    }
 }
 
 function displayPinContent(tagsAndDescriptions) {
