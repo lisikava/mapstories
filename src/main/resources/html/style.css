@@ -257,7 +257,7 @@ border-radius: 5px;
 display: none !important;
 }
 
-#search-form-container {
+#advanced-search-form-container {
 position: absolute;
 border-radius: 20px;
 top: 20%;
@@ -278,7 +278,7 @@ transition: opacity 0.3s cubic-bezier(.77, 0, .175, 1),
            transform 0.3s cubic-bezier(.77, 0, .175, 1);
 }
 
-#search-form-container.hidden {
+#advanced-search-form-container.hidden {
 opacity: 0;
 visibility: hidden;
 transform: translateY(-20px);

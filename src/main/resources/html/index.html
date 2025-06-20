@@ -18,15 +18,17 @@
 <body>
     <nav>
         <div class="app-name">MapStories</div>
+        <!-- Container with Simple (magnifier) and Advanced ('Advanced' text button) search buttons -->
         <div class="search-buttons-container">
             <input class="simple-search-text" type="text" placeholder="Search"/>
-                <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24">
+                <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24"> <!-- Magnifier icon (Button for Simple Search)-->
                     <circle cx="17" cy="10" r="6" fill="none" stroke="#d8791f" stroke-width="1"/>
                     <line x1="14" y1="15.2" x2="10" y2="21" stroke="#d8791f" stroke-width="1" stroke-linecap="round"/>
-                </svg>
+                </svg> <!-- Magnifier icon -->
             <div class="advanced-search-text">advanced</div>
-            <div class="advanced-search-button">
+            <div class="advanced-search-button"> <!-- Advanced Search button that opens the Advanced Search Form -->
             </div>
+            <!-- Container with Simple (magnifier) and Advanced ('Advanced' text button) search buttons -->
         </div>
 
     </nav>
@@ -44,8 +46,8 @@
             <button type="button" id="submit-description" class="submit-description">Submit</button>
         </div>
     </div>
-    
-    <div id="search-form-container" class="hidden">
+    <!-- Advanced Search Form Container -->
+    <div id="advanced-search-form-container" class="hidden">
         <div class="search-section">
             <div class="search-section-header">Tags</div>
             <div class="search-input-row">
@@ -72,20 +74,21 @@
             <div class="search-section-header follow">Follow</div>
             <div class="search-input-row">
                 <input type="text" class="search-input-outline hidden" placeholder="Enter your email">
-                <button type="button" class="email-button-outline hidden">
+                <button type="button" class="email-button-outline hidden">                                                              <!-- Email button that sends an email to the user -->
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    </svg>   <!-- Email button that sends an email to the user -->
                 </button> 
             </div>
         </div>
         
         <div class="search-controls">
-            <button type="button" id="search-cancel" class="search-button-style search-cancel">Cancel</button>
-            <button type="button" id="search-submit" class="search-button-style search-submit">Search</button>
+            <button type="button" id="search-cancel" class="search-button-style search-cancel">Cancel</button> <!-- Cancel button that closes the Advanced Search Form -->
+            <button type="button" id="search-submit" class="search-button-style search-submit">Search</button> <!-- Search button that searches for pins -->
         </div>
     </div>
+    <!-- Advanced Search Form Container -->
 </body>
 
 <script src="components.js"></script>
