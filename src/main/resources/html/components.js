@@ -34,7 +34,7 @@ const addCellButton = document.getElementById('add-cell');
 const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
 const searchButton = document.getElementById('lasso-wrap');
-const searchFormContainer = document.getElementById('search-form-container');
+const advancedSearchFormContainer = document.getElementById('advanced-search-form-container');
 const searchCancelButton = document.getElementById('search-cancel');
 const searchSubmitButton = document.getElementById('search-submit');
 
@@ -414,14 +414,16 @@ async function loadPins() {
     }
 }
 
+// Function that opens the Advanced Search Form
 function openSearchForm() {
-    const advancedButton = document.querySelector('.search-button');
+    const searchButtonsContainer = document.querySelector('.search-buttons-container');
     
     if (searchFormOpen) {
-        searchFormContainer.classList.add('hidden');
-        advancedButton.classList.remove('active');
+        advancedSearchFormContainer.classList.add('hidden');
+        searchButtonsContainer.classList.remove('active');
         searchFormOpen = false;
-    } else {
+    }   // If the Advanced Search Form is already open, close Pins Description Container
+    else {
         if (createFormOpen) {
             pinsDescriptionContainer.classList.add('hidden');
             createFormOpen = false;
@@ -430,44 +432,46 @@ function openSearchForm() {
                 currentPin = null;
             }
         }
-        searchFormContainer.classList.remove('hidden');
-        advancedButton.classList.add('active');
+        advancedSearchFormContainer.classList.remove('hidden');
+        searchButtonsContainer.classList.add('active');
         searchFormOpen = true;
     }
 }
 
+// Function that closes the Advanced Search Form 
 function closeSearchForm() {
-    const advancedButton = document.querySelector('.search-button');
+    const searchButtonsContainer = document.querySelector('.search-buttons-container');
     
-    searchFormContainer.classList.add('hidden');
-    advancedButton.classList.remove('active');
+    advancedSearchFormContainer.classList.add('hidden');
+    searchButtonsContainer.classList.remove('active');
     searchFormOpen = false;
-    const searchInputs = searchFormContainer.querySelectorAll('.search-input-outline');
-    searchInputs.forEach(input => input.value = '');
 }
 
+// Function that handles the search submit
 function handleSearchSubmit() {
-    const searchInputs = searchFormContainer.querySelectorAll('.search-input-outline');
-    const searchValues = Array.from(searchInputs).map(input => input.value.trim()).filter(value => value !== '');
-    
+
     closeSearchForm();
 }
 
-searchCancelButton.addEventListener('click', closeSearchForm);
-searchSubmitButton.addEventListener('click', handleSearchSubmit);
+searchCancelButton.addEventListener('click', closeSearchForm);           //  Listener for the Cancel button that closes the Advanced Search Form
+searchSubmitButton.addEventListener('click', handleSearchSubmit); //  Listener for the Advanced Search button (Search button)
 
 document.addEventListener('DOMContentLoaded', function() {
-    const advancedButton = document.querySelector('.search-button');
+    const advancedButton = document.querySelector('.advanced-search-button');
     if (advancedButton) {
-        advancedButton.addEventListener('click', openSearchForm);
+        advancedButton.addEventListener('click', openSearchForm);   // Advanced Search button (Advanced text button)
     }
 });
 
 
-document.querySelector(".advanced-svg").addEventListener("click", () =>{console.log("Pressed")});
+document.querySelector(".simple-search-svg").addEventListener("click", () =>{console.log("Search pressed")}); // Listener for the Simple Search button (Magnifier Icon)
+document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
 
-const  followText = document.querySelector(".follow");
+
+const  followText = document.querySelector(".follow");  // Follow text button
 followText.addEventListener("click", () =>{
-    const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");
+    const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");  // Search input field for the email
+    const emailButtonOutline = document.querySelector(".email-button-outline");                                                                     // Email button that sends an email to the user
     searchInputOutline.classList.toggle("hidden");
+    emailButtonOutline.classList.toggle("hidden");
 });

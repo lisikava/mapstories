@@ -49,7 +49,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-.search-text {
+.simple-search-text {
   position: absolute;
   left: -70px;
   bottom: 15px;
@@ -75,7 +75,7 @@ body {
   transform: translateY(-50%);
 }
 
-.search-button {
+.advanced-search-button { 
   position: absolute;
   z-index: 1;
   display: inline-block;
@@ -102,7 +102,7 @@ body {
   transform: translateY(-50%);
 }
 
-.advanced-text {
+.advanced-search-text {
   color: var(--gold-color);
   position: absolute;
   display: block;
@@ -126,7 +126,7 @@ body {
   transition: .6s opacity cubic-bezier(.77, 0, .175, 1) .1s;
 }
 
-svg.advanced-svg {
+svg.simple-search-svg {
   position: absolute;
   width: 40px;
   left: -12px;
@@ -138,8 +138,8 @@ svg.advanced-svg {
   transform: translateY(-50%);
 }
 
-.search-buttons-container:hover .search-button,
-.search-buttons-container.active .search-button {
+.search-buttons-container:hover .advanced-search-button,
+.search-buttons-container.active .advanced-search-button {
   z-index: 3;
   width: 110px;
   margin: auto;
@@ -150,8 +150,8 @@ svg.advanced-svg {
   left: 128px;
 }
 
-.search-buttons-container:hover .advanced-text,
-.search-buttons-container.active .advanced-text {
+.search-buttons-container:hover .advanced-search-text,
+.search-buttons-container.active .advanced-search-text {
   opacity: 1;
 }
 
@@ -254,18 +254,10 @@ border-radius: 5px;
 }
 
 .hidden{
-display: none;
+display: none !important;
 }
 
-#search-form-container.hidden {
-display: block;
-}
-
-#pins-description-container.hidden {
-display: block;
-}
-
-#search-form-container {
+#advanced-search-form-container {
 position: absolute;
 border-radius: 20px;
 top: 20%;
@@ -286,7 +278,7 @@ transition: opacity 0.3s cubic-bezier(.77, 0, .175, 1),
            transform 0.3s cubic-bezier(.77, 0, .175, 1);
 }
 
-#search-form-container.hidden {
+#advanced-search-form-container.hidden {
 opacity: 0;
 visibility: hidden;
 transform: translateY(-20px);
@@ -356,3 +348,26 @@ color: var(--color-black);
 background-color: #b44d2d;
 color: var(--color-black);
 }
+
+.email-button-outline {
+  padding: 10px 12px;
+  background-color: var(--color-blue);
+  color: var(--color-black);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  min-width: 44px;
+  height: 44px;
+  }
+  
+  .email-button-outline:hover {
+  background-color: #007a91;
+  }
+  
+  .email-button svg {
+  color: var(--color-black);
+  }
