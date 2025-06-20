@@ -64,7 +64,7 @@ body {
   max-width: 8.5vw;
 }
 
-.search-button-container {
+.search-buttons-container {
   width: 200px;
   height: 80px;
   position: absolute;
@@ -138,8 +138,8 @@ svg.advanced-svg {
   transform: translateY(-50%);
 }
 
-.search-button-container:hover .search-button,
-.search-button-container.active .search-button {
+.search-buttons-container:hover .search-button,
+.search-buttons-container.active .search-button {
   z-index: 3;
   width: 110px;
   margin: auto;
@@ -150,8 +150,8 @@ svg.advanced-svg {
   left: 128px;
 }
 
-.search-button-container:hover .advanced-text,
-.search-button-container.active .advanced-text {
+.search-buttons-container:hover .advanced-text,
+.search-buttons-container.active .advanced-text {
   opacity: 1;
 }
 

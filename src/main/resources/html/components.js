@@ -415,7 +415,7 @@ async function loadPins() {
 }
 
 function openSearchForm() {
-    const advancedButton = document.querySelector('.search-button-container');
+    const advancedButton = document.querySelector('.search-button');
     
     if (searchFormOpen) {
         searchFormContainer.classList.add('hidden');
@@ -437,7 +437,7 @@ function openSearchForm() {
 }
 
 function closeSearchForm() {
-    const advancedButton = document.querySelector('.search-button-container');
+    const advancedButton = document.querySelector('.search-button');
     
     searchFormContainer.classList.add('hidden');
     advancedButton.classList.remove('active');
@@ -457,8 +457,17 @@ searchCancelButton.addEventListener('click', closeSearchForm);
 searchSubmitButton.addEventListener('click', handleSearchSubmit);
 
 document.addEventListener('DOMContentLoaded', function() {
-    const advancedButton = document.querySelector('.search-button-container');
+    const advancedButton = document.querySelector('.search-button');
     if (advancedButton) {
         advancedButton.addEventListener('click', openSearchForm);
     }
+});
+
+
+document.querySelector(".advanced-svg").addEventListener("click", () =>{console.log("Pressed")});
+
+const  followText = document.querySelector(".follow");
+followText.addEventListener("click", () =>{
+    const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");
+    searchInputOutline.classList.toggle("hidden");
 });
