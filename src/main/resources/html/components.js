@@ -34,10 +34,14 @@ const addCellButton = document.getElementById('add-cell');
 const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
 const searchButton = document.getElementById('lasso-wrap');
+const searchFormContainer = document.getElementById('search-form-container');
+const searchCancelButton = document.getElementById('search-cancel');
+const searchSubmitButton = document.getElementById('search-submit');
 
 let currentPin;
 let createFormOpen = false;
 let editFormOpen = false;
+let searchFormOpen = false;
 const allDescriptions = [];
 const placedPins = [];
 
@@ -352,6 +356,9 @@ function displayPinContent(tagsAndDescriptions) {
 }
 
 map.on('click', function (e) {
+    if (searchFormOpen)
+        return;
+    
     let pinClicked = false;
     placedPins.forEach(pinInfo => {
         if (e.layerPoint && pinInfo.pin.getLatLng().equals(e.latlng)) {
@@ -406,3 +413,52 @@ async function loadPins() {
         console.error('Failed to load pins:', error);
     }
 }
+
+function openSearchForm() {
+    const advancedButton = document.querySelector('.search-button-container');
+    
+    if (searchFormOpen) {
+        searchFormContainer.classList.add('hidden');
+        advancedButton.classList.remove('active');
+        searchFormOpen = false;
+    } else {
+        if (createFormOpen) {
+            pinsDescriptionContainer.classList.add('hidden');
+            createFormOpen = false;
+            if (currentPin && !editFormOpen) {
+                map.removeLayer(currentPin);
+                currentPin = null;
+            }
+        }
+        searchFormContainer.classList.remove('hidden');
+        advancedButton.classList.add('active');
+        searchFormOpen = true;
+    }
+}
+
+function closeSearchForm() {
+    const advancedButton = document.querySelector('.search-button-container');
+    
+    searchFormContainer.classList.add('hidden');
+    advancedButton.classList.remove('active');
+    searchFormOpen = false;
+    const searchInputs = searchFormContainer.querySelectorAll('.search-input-outline');
+    searchInputs.forEach(input => input.value = '');
+}
+
+function handleSearchSubmit() {
+    const searchInputs = searchFormContainer.querySelectorAll('.search-input-outline');
+    const searchValues = Array.from(searchInputs).map(input => input.value.trim()).filter(value => value !== '');
+    
+    closeSearchForm();
+}
+
+searchCancelButton.addEventListener('click', closeSearchForm);
+searchSubmitButton.addEventListener('click', handleSearchSubmit);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const advancedButton = document.querySelector('.search-button-container');
+    if (advancedButton) {
+        advancedButton.addEventListener('click', openSearchForm);
+    }
+});

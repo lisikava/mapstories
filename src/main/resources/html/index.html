@@ -19,19 +19,17 @@
 <body>
     <nav>
         <div class="app-name">MapStories</div>
-        <div class="lasso">
-            <input class="lasso-text" type="text" placeholder="Search"/>
-            <div class="lasso-wrap">
-                <div class="lasso-triangle">
-                </div>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="58px" height="58px" viewBox="0 0 16 16"
-                    preserveAspectRatio="none">
-                    <circle cx="8" cy="8" r="6.215" transform="rotate(90 8 8)"></circle>
-                    <image href="https://uxwing.com/wp-content/themes/uxwing/download/user-interface/search-icon.svg"
-                        x="5.2" y="5.5" width="6" height="6" , fill="#D3C196" />
-                </svg>
-            </div>
-            <div class="lasso-border">
+        <div class="search-button-container">
+            <input class="search-text" type="text" placeholder="Search"/>
+            <svg class="advanced-svg" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 22.7 17.3" enable-background="new 0 0 22.7 17.3" xml:space="preserve">
+                <g>
+                    <polygon fill="#d8791f" points="22.2,9 0.2,9 0.2,8.3 22.2,8.3 22.5,8.7 	" />
+                    <rect x="12.1" y="4.2" transform="matrix(0.7071 0.7071 -0.7071 0.7071 8.4104 -11.3142)" fill="#d8791f" width="11.5" height="0.7" />
+                    <rect x="12.1" y="12.5" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -3.8339 16.386)" fill="#d8791f" width="11.5" height="0.7" />
+                </g>
+            </svg>
+            <div class="advanced-text">advanced</div>
+            <div class="search-button">
             </div>
         </div>
 
@@ -48,6 +46,42 @@
             <button type="button" id="add-cell" class="add-cell">+</button>
             <button type="button" id="cancel-description" class="cancel-description">Cancel</button>
             <button type="button" id="submit-description" class="submit-description">Submit</button>
+        </div>
+    </div>
+    
+    <div id="search-form-container" class="hidden">
+        <div class="search-section">
+            <div class="search-section-header">Tags</div>
+            <div class="search-input-row">
+                <input type="text" class="search-input-outline " placeholder="Tag">
+                <input type="text" class="search-input-outline " placeholder="Description">
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-section-header">Time</div>
+            <div class="search-input-row">
+                <input type="text" class="search-input-outline" placeholder="Enter time">
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-section-header">Bounding Box</div>
+            <div class="search-input-row">
+                <input type="text" class="search-input-outline" placeholder="Enter coordinates">
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-section-header follow">Follow</div>
+            <div class="search-input-row">
+                <input type="text" class="search-input-outline" placeholder="Enter your email">
+            </div>
+        </div>
+        
+        <div class="search-controls">
+            <button type="button" id="search-cancel" class="search-button-style search-cancel">Cancel</button>
+            <button type="button" id="search-submit" class="search-button-style search-submit">Search</button>
         </div>
     </div>
 </body>
