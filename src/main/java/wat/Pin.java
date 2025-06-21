@@ -3,6 +3,7 @@ package wat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.postgresql.geometric.PGpoint;
+import org.postgresql.util.PGobject;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -23,7 +24,7 @@ public class Pin {
 
     private static final String retrieveQuery = """
             with pattern as (select
-                ?::jsonb as pattern
+                ? as pattern
             ),
             params as (
                 select
@@ -47,6 +48,7 @@ public class Pin {
                     params.bbox @> pins.location
                 ) and (
                     params.categories is null or
+                    jsonb_typeof(params.categories) = 'null' or
                     exists (
                         select 1
                         from jsonb_array_elements_text(params.categories) super
@@ -54,6 +56,7 @@ public class Pin {
                     )
                 ) and (
                     params.tags is null or
+                    jsonb_typeof(params.tags) = 'null' or
                     not exists (
                         select 1
                         from jsonb_each_text(params.tags) as tag
@@ -124,7 +127,10 @@ public class Pin {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(retrieveQuery);
             ObjectMapper objectMapper = new ObjectMapper();
-            pstmt.setString(1, pattern);
+            PGobject jsonbObj = new PGobject();
+            jsonbObj.setType("jsonb");
+            jsonbObj.setValue(pattern);
+            pstmt.setObject(1, jsonbObj);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
                 foundPins.add(new Pin(rs.getInt(1),
