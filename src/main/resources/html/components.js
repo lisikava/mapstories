@@ -18,7 +18,21 @@ const pinIcon = L.icon({
     iconSize: [40, 40],
 });
 
-// Add CSS for error state
+const reportIcon = L.icon({
+    iconUrl: './assets/incident-1.svg',
+    iconSize: [40, 40],
+});
+
+function getIconForCategory(category) {
+    if (!category) return pinIcon;
+    
+    const categoryLower = category.toLowerCase();
+    if (categoryLower.includes('report')) {
+        return reportIcon;
+    }
+    return pinIcon;
+}
+
 const style = document.createElement('style');
 style.textContent = `
     .description-input-group input.error {
@@ -126,6 +140,9 @@ const submitCreateHandler = async function () {
         });
         const result = await response.json();
 
+        const newIcon = getIconForCategory(category);
+        currentPin.setIcon(newIcon);
+
         placedPins.push({
             pin: currentPin,
             tagsAndDescriptions: currentPinTagsAndDescriptions,
@@ -209,6 +226,9 @@ const submitEditHandler = async function () {
         });
 
         if (response.ok) {
+            const newIcon = getIconForCategory(category);
+            currentPin.setIcon(newIcon);
+            
             pinInfo.tagsAndDescriptions = updatedTagsAndDescriptions;
             const newPopup = buildPopUpContent(updatedTagsAndDescriptions, placedPins.indexOf(pinInfo));
             currentPin.bindPopup(newPopup).openPopup();
@@ -399,7 +419,7 @@ async function loadPins() {
         const response = await fetch('/pins');
         const pins = await response.json();
         pins.forEach((pin, idx) => {
-            const marker = L.marker([pin.location.x, pin.location.y], { icon: pinIcon }).addTo(map);
+            const marker = L.marker([pin.location.x, pin.location.y], { icon: getIconForCategory(pin.category) }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
@@ -461,7 +481,7 @@ async function simpleSearch(category) {
         placedPins.length = 0;
 
         pins.forEach((pin, idx) => {
-            const marker = L.marker([pin.location.x, pin.location.y], { icon: pinIcon }).addTo(map);
+            const marker = L.marker([pin.location.x, pin.location.y], { icon: getIconForCategory(pin.category) }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))

@@ -37,7 +37,7 @@ nav {
   background-color: rgba(0, 0, 0, 0.268);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   position: fixed;
   top: 1%;
   left: 50%;
@@ -49,30 +49,31 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
+.search-section-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
 .simple-search-text {
-  position: absolute;
-  left: -70px;
-  bottom: 15px;
   font-size: 40px;
   letter-spacing: 3px;
   line-height: 1.1;
-  text-align: left;
   color: var(--color-creme);
-  background-color:  transparent;
-  border:  none;
+  background-color: transparent;
+  border: none;
   outline: none;
-  max-width: 8.5vw;
+  max-width: 10vw;
+  padding-left: 6vw;
 }
 
 .search-buttons-container {
+  display: flex;
+  align-items: center;
+  position: relative;
   width: 200px;
-  height: 80px;
-  position: absolute;
-  left: 140px;
-  top: 50%;
-  -webkit-transform: translateY(-50%);
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
+  height: 50px;
+  right: 100px;
 }
 
 .advanced-search-button { 
@@ -106,9 +107,9 @@ body {
   color: var(--gold-color);
   position: absolute;
   display: block;
-  left: 145px;
+  left: 143px;
   right: 0;
-  top: 26px;
+  top: 12px;
   width: 70px;
   font-family: 'Roboto', sans-serif;
   letter-spacing: 0.07em;

@@ -17,23 +17,19 @@
 
 <body>
     <nav>
-        <div class="app-name">MapStories</div>
-        <!-- Container with Simple (magnifier) and Advanced ('Advanced' text button) search buttons -->
-        <div class="search-buttons-container">
-            <!-- <form> -->
-                <input class="simple-search-text" name="category" type="text" placeholder="Search"/>
+        <div class="search-section-left">
+            <input class="simple-search-text" name="category" type="text" placeholder="Search"/>
+            <div class="search-buttons-container">
                 <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24"> <!-- Magnifier icon (Button for Simple Search)-->
                     <circle cx="17" cy="10" r="6" fill="none" stroke="#d8791f" stroke-width="1"/>
                     <line x1="14" y1="15.2" x2="10" y2="21" stroke="#d8791f" stroke-width="1" stroke-linecap="round"/>
                 </svg> <!-- Magnifier icon -->
                 <div class="advanced-search-text">advanced</div>
                 <div class="advanced-search-button"> <!-- Advanced Search button that opens the Advanced Search Form -->
-            <!-- </form> -->
-
+                </div>
             </div>
-            <!-- Container with Simple (magnifier) and Advanced ('Advanced' text button) search buttons -->
         </div>
-
+        <div class="app-name">MapStories</div>
     </nav>
     <div id="map"></div>
     <div id="pins-description-container" class="hidden">
