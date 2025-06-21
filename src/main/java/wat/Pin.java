@@ -23,7 +23,7 @@ public class Pin {
 
     private static final String retrieveQuery = """
             with pattern as (select
-                '{"bbox": "(40.0, 10.0), (60.0, 30.0)", "categories": ["event", "report"], "tags": {"description": null}, "after": "2025-06-01 09:00:00+2"}'::jsonb as pattern
+                ?::jsonb as pattern
             ),
             params as (
                 select
