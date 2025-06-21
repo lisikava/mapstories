@@ -453,6 +453,30 @@ function handleSearchSubmit() {
     closeSearchForm();
 }
 
+async function simpleSearch(category) {
+    try {
+        const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
+        const pins = await response.json();
+        placedPins.forEach(info => map.removeLayer(info.pin));
+        placedPins.length = 0;
+
+        pins.forEach((pin, idx) => {
+            const marker = L.marker([pin.location.x, pin.location.y], { icon: pinIcon }).addTo(map);
+            const tagsAndDescriptions = [
+                { tag: 'Category', description: pin.category },
+                ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
+            ];
+            const popupContent = buildPopUpContent(tagsAndDescriptions, idx);
+            marker.bindPopup(popupContent);
+            placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions, id: pin.id });
+            setupPopupButtonEvents(marker, idx);
+        });
+        map.setView([placedPins[0].pin.getLatLng().lat, placedPins[0].pin.getLatLng().lng], 12);
+    } catch(err) {
+        console.error("Error searching:", err);
+    }
+}
+
 searchCancelButton.addEventListener('click', closeSearchForm);           //  Listener for the Cancel button that closes the Advanced Search Form
 searchSubmitButton.addEventListener('click', handleSearchSubmit); //  Listener for the Advanced Search button (Search button)
 
@@ -464,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-document.querySelector(".simple-search-svg").addEventListener("click", () =>{console.log("Search pressed")}); // Listener for the Simple Search button (Magnifier Icon)
+document.querySelector(".simple-search-svg").addEventListener("click", () => { simpleSearch(document.querySelector(".simple-search-text").value.trim()) }); // Listener for the Simple Search button (Magnifier Icon)
 document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
 
 

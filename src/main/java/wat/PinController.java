@@ -15,10 +15,11 @@ public class PinController {
         app.post("/pins", this::createPin);
         app.delete("/pins/{id}", this::deletePin);
         app.put("/pins/{id}", this::updatePin);
+        app.get("/pins/search", this::search);
     }
 
     private void getAllPins(Context ctx) {
-        List<Pin> pins = Pin.retrieve("{\"bbox\": \"(0, 0), (60.0, 60.0)\", \"categories\": null, \"tags\": {\"description\":null}}");
+        List<Pin> pins = Pin.retrieve("{}");
         ctx.json(pins);
     }
 
@@ -47,6 +48,13 @@ public class PinController {
         String category = (String) json.get("category");
         Map<String, String> tags = (Map<String, String>) json.get("tags");
         Pin.update(id, new PGpoint(lat, lon), category, tags);
+    }
+
+    private void search(Context ctx) {
+        String category = ctx.queryParam("category");
+        String pattern = String.format("{\"categories\": [\"%s\"]}", category);
+        List<Pin> pins = Pin.retrieve(pattern);
+        ctx.json(pins);
     }
 
 }
