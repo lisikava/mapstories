@@ -23,13 +23,73 @@ const reportIcon = L.icon({
     iconSize: [40, 40],
 });
 
+function getCSSVariable(variableName) {
+    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+}
+
+const eventCSSVariables = {
+    'event.restaurant': '--event-restaurant',
+    'event.cafe': '--event-cafe',
+    'event.bar': '--event-bar',
+    'event.park': '--event-park',
+    'event.museum': '--event-museum',
+    'event.art': '--event-art',
+    'event.shop': '--event-shop',
+    'event.hotel': '--event-hotel',
+    'event.default': '--event-default'
+};
+
+function createColoredPinIcon(color) {
+    const svgContent = `
+        <svg width="800px" height="800px" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="${color}">
+            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
+            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
+            <g id="SVGRepo_iconCarrier">
+                <g id="Layer_2" data-name="Layer 2">
+                    <g id="invisible_box" data-name="invisible box">
+                        <rect width="48" height="48" fill="none"/>
+                    </g>
+                    <g id="icons_Q2" data-name="icons Q2">
+                        <path d="M24,4a12,12,0,0,0-2,23.8V42a2,2,0,0,0,4,0V27.8A12,12,0,0,0,24,4Zm0,16a4,4,0,1,1,4-4A4,4,0,0,1,24,20Z"/>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    `;
+    
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    
+    return L.icon({
+        iconUrl: url,
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+    });
+}
+
 function getIconForCategory(category) {
     if (!category) return pinIcon;
     
     const categoryLower = category.toLowerCase();
+    
     if (categoryLower.includes('report')) {
         return reportIcon;
     }
+    
+    if (categoryLower.startsWith('event.')) {
+        const eventType = categoryLower;
+        const cssVariableName = eventCSSVariables[eventType];
+        
+        if (cssVariableName) {
+            const color = getCSSVariable(cssVariableName);
+            return createColoredPinIcon(color);
+        } else {
+            const defaultColor = getCSSVariable(eventCSSVariables['event.default']);
+            return createColoredPinIcon(defaultColor);
+        }
+    }
+    
     return pinIcon;
 }
 
