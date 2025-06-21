@@ -23,13 +23,14 @@ public class Pin {
 
     private static final String retrieveQuery = """
             with pattern as (select
-                to_jsonb(?) as pattern
+                '{"bbox": "(40.0, 10.0), (60.0, 30.0)", "categories": ["event", "report"], "tags": {"description": null}, "after": "2025-06-01 09:00:00+2"}'::jsonb as pattern
             ),
             params as (
                 select
                     (pattern->>'bbox')::box as bbox,
                     pattern->'categories' as categories,
-                    pattern->'tags' as tags
+                    pattern->'tags' as tags,
+                    (pattern->>'after')::timestamp as after
                 from pattern
             )
             select
@@ -63,8 +64,10 @@ public class Pin {
                             )
                         )
                     )
-                )
-            ;""";
+                ) and (
+                    after is null or
+                    update_time > after
+                )""";
 
     private static final String updateQuery = """
             update pins
