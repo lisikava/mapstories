@@ -111,6 +111,9 @@ const searchButton = document.getElementById('lasso-wrap');
 const advancedSearchFormContainer = document.getElementById('advanced-search-form-container');
 const searchCancelButton = document.getElementById('search-cancel');
 const searchSubmitButton = document.getElementById('search-submit');
+const addTagRowButton = document.getElementById('add-tag-row');
+const removeTagRowButton = document.getElementById('remove-tag-row');
+const tagsContainer = document.getElementById('tags-container');
 
 let currentPin;
 let createFormOpen = false;
@@ -533,6 +536,25 @@ function handleSearchSubmit() {
     closeSearchForm();
 }
 
+// Function to add new tag + description row
+function addTagRow() {
+    const newTagRow = document.createElement('div');
+    newTagRow.classList.add('search-input-row');
+    newTagRow.innerHTML = `
+        <input type="text" class="search-input-outline" placeholder="Tag">
+        <input type="text" class="search-input-outline" placeholder="Description">
+    `;
+    tagsContainer.appendChild(newTagRow);
+}
+
+function removeTagRow() {
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+    if (tagRows.length > 1) {
+        const lastRow = tagRows[tagRows.length - 1];
+        tagsContainer.removeChild(lastRow);
+    }
+}
+
 async function simpleSearch(category) {
     try {
         const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
@@ -559,6 +581,8 @@ async function simpleSearch(category) {
 
 searchCancelButton.addEventListener('click', closeSearchForm);           //  Listener for the Cancel button that closes the Advanced Search Form
 searchSubmitButton.addEventListener('click', handleSearchSubmit); //  Listener for the Advanced Search button (Search button)
+addTagRowButton.addEventListener('click', addTagRow);             //  Listener for the Add Tag Row button
+removeTagRowButton.addEventListener('click', removeTagRow);       //  Listener for the Remove Tag Row button
 
 document.addEventListener('DOMContentLoaded', function() {
     const advancedButton = document.querySelector('.advanced-search-button');

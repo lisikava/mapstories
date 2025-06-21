@@ -48,10 +48,18 @@
     <!-- Advanced Search Form Container -->
     <div id="advanced-search-form-container" class="hidden">
         <div class="search-section">
-            <div class="search-section-header">Tags</div>
-            <div class="search-input-row">
-                <input type="text" class="search-input-outline " placeholder="Tag">
-                <input type="text" class="search-input-outline " placeholder="Description">
+            <div class="search-section-header-with-button">
+                <div class="search-section-header">Tags</div>
+                <div class="search-buttons-group">
+                    <button type="button" id="add-tag-row" class="add-tag-row">+</button>
+                    <button type="button" id="remove-tag-row" class="remove-tag-row">-</button>
+                </div>
+            </div>
+            <div id="tags-container">
+                <div class="search-input-row">
+                    <input type="text" class="search-input-outline " placeholder="Tag">
+                    <input type="text" class="search-input-outline " placeholder="Description">
+                </div>
             </div>
         </div>
         
