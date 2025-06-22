@@ -36,7 +36,7 @@ const eventCSSVariables = {
     'event': '--event',
     'found': '--found',
     'lost': '--lost',
-    'event.default': '--event-default'
+    'default': '--default'
 };
 
 function createColoredPinIcon(color) {
@@ -85,7 +85,7 @@ function getIconForCategory(category) {
             const color = getCSSVariable(cssVariableName);
             return createColoredPinIcon(color);
         } else {
-            const defaultColor = getCSSVariable(eventCSSVariables['event.default']);
+            const defaultColor = getCSSVariable(eventCSSVariables['default']);
             return createColoredPinIcon(defaultColor);
         }
     // }
@@ -561,19 +561,21 @@ async function simpleSearch(category) {
         const pins = await response.json();
         placedPins.forEach(info => map.removeLayer(info.pin));
         placedPins.length = 0;
-
+        var latlngs = [];
         pins.forEach((pin, idx) => {
             const marker = L.marker([pin.location.x, pin.location.y], { icon: getIconForCategory(pin.category) }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
                 ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
             ];
+            latlngs.push(marker.getLatLng());
             const popupContent = buildPopUpContent(tagsAndDescriptions, idx);
             marker.bindPopup(popupContent);
             placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions, id: pin.id });
             setupPopupButtonEvents(marker, idx);
         });
-        map.setView([placedPins[0].pin.getLatLng().lat, placedPins[0].pin.getLatLng().lng], 12);
+        var bounds = new L.LatLngBounds(latlngs);
+        map.fitBounds(bounds);
     } catch(err) {
         console.error("Error searching:", err);
     }
@@ -596,7 +598,7 @@ document.querySelector(".simple-search-svg").addEventListener("click", () => { s
 document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
 
 
-const  followText = document.querySelector(".follow");  // Follow text button
+const  followText = document.querySelector(".subscribe");  // Subscribe text button
 followText.addEventListener("click", () =>{
     const searchInputOutline = document.querySelector(".search-input-outline[placeholder='Enter your email']");  // Search input field for the email
     const emailButtonOutline = document.querySelector(".email-button-outline");                                                                     // Email button that sends an email to the user

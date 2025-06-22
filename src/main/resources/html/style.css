@@ -17,7 +17,7 @@
   --event: #d51fd8;
   --found: #1F7ED8;
   --lost: #6e58a2;
-  --event-default: #b79171;
+  --default: #b79171;
 }
 body {
   font-family: "Roboto", sans-serif;
