@@ -481,17 +481,8 @@ async function loadPins() {
     try {
         const response = await fetch('/pins');
         const pins = await response.json();
-        pins.forEach((pin, idx) => {
-            const marker = L.marker([pin.location.x, pin.location.y], { icon: getIconForCategory(pin.category) }).addTo(map);
-            const tagsAndDescriptions = [
-                { tag: 'Category', description: pin.category },
-                ...Object.entries(pin.tags || {}).map(([tag, description]) => ({tag, description}))
-            ];
-            popupContent = buildPopUpContent(tagsAndDescriptions, idx);
-            marker.bindPopup(popupContent);
-            placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions, id: pin.id });
-            setupPopupButtonEvents(marker, idx);
-        });
+        displayPins(pins);
+        map.setView([50.065870, 19.934727], 12);
     } catch (error) {
         console.error('Failed to load pins:', error);
     }
@@ -555,14 +546,9 @@ function removeTagRow() {
     }
 }
 
-async function simpleSearch(category) {
-    try {
-        const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
-        const pins = await response.json();
-        placedPins.forEach(info => map.removeLayer(info.pin));
-        placedPins.length = 0;
-        var latlngs = [];
-        pins.forEach((pin, idx) => {
+function displayPins(pins) {
+    var latlngs = [];
+    pins.forEach((pin, idx) => {
             const marker = L.marker([pin.location.x, pin.location.y], { icon: getIconForCategory(pin.category) }).addTo(map);
             const tagsAndDescriptions = [
                 { tag: 'Category', description: pin.category },
@@ -574,6 +560,21 @@ async function simpleSearch(category) {
             placedPins.push({ pin: marker, tagsAndDescriptions: tagsAndDescriptions, id: pin.id });
             setupPopupButtonEvents(marker, idx);
         });
+    return latlngs;
+}
+
+async function simpleSearch(category) {
+    try {
+        if (category === '')
+            loadPins();
+        const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
+        const pins = await response.json();
+        // if (!pins.length) {
+        //     loadPins();
+        // }
+        placedPins.forEach(info => map.removeLayer(info.pin));
+        placedPins.length = 0;
+        var latlngs = displayPins(pins); 
         var bounds = new L.LatLngBounds(latlngs);
         map.fitBounds(bounds);
     } catch(err) {
