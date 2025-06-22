@@ -10,13 +10,13 @@
   --color-lgray: rgba(77, 96, 128, 0.8);
 
   --event-restaurant: #E6D53A;
-  --event-cafe: #834913;
+  --story: #834913;
   --event-bar: #134c82;
   --event-park: #22d81f;
   --event-museum: #f3ede8;
-  --event-art: #d51fd8;
-  --event-shop: #1F7ED8;
-  --event-hotel: #6e58a2;
+  --event: #d51fd8;
+  --found: #1F7ED8;
+  --lost: #6e58a2;
   --event-default: #b79171;
 }
 body {

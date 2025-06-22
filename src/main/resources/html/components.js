@@ -29,13 +29,13 @@ function getCSSVariable(variableName) {
 
 const eventCSSVariables = {
     'event.restaurant': '--event-restaurant',
-    'event.cafe': '--event-cafe',
+    'story': '--story',
     'event.bar': '--event-bar',
     'event.park': '--event-park',
     'event.museum': '--event-museum',
-    'event.art': '--event-art',
-    'event.shop': '--event-shop',
-    'event.hotel': '--event-hotel',
+    'event': '--event',
+    'found': '--found',
+    'lost': '--lost',
     'event.default': '--event-default'
 };
 
@@ -77,7 +77,7 @@ function getIconForCategory(category) {
         return reportIcon;
     }
     
-    if (categoryLower.startsWith('event.')) {
+    // if (categoryLower.startsWith('event.')) {
         const eventType = categoryLower;
         const cssVariableName = eventCSSVariables[eventType];
         
@@ -88,7 +88,7 @@ function getIconForCategory(category) {
             const defaultColor = getCSSVariable(eventCSSVariables['event.default']);
             return createColoredPinIcon(defaultColor);
         }
-    }
+    // }
     
     return pinIcon;
 }
