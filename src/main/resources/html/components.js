@@ -1,6 +1,7 @@
 tileLayerURL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 
 window.onload = async function () {
+    clearAllFields();
     await loadPins();
 }
 
@@ -113,6 +114,19 @@ function addListeners() {
     addCellButton.addEventListener('click', addDescriptionHandler);
     submitDescriptionButton.addEventListener('click', submitDescriptionHandler);
     cancelDescriptionButton.addEventListener('click', cancelDescriptionHandler);
+}
+
+function clearAllFields() {
+    document.querySelector(".simple-search-text").value = "";
+    document.getElementById('search-bbox-input').value = "";
+    document.getElementById('search-after-input').value = "";
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+    tagRows.forEach(pair => {
+        const tagInput = pair.querySelector('.search-tag-input');
+        const descriptionInput = pair.querySelector('.search-description-input');
+        tagInput.value = "";
+        descriptionInput.value = "";
+    });
 }
 
 const addDescriptionHandler = function () {
@@ -488,6 +502,8 @@ function openSearchForm() {
                 currentPin = null;
             }
         }
+        var currentBounds = [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]
+        document.getElementById('search-bbox-input').value = currentBounds;
         advancedSearchFormContainer.classList.remove('hidden');
         searchButtonsContainer.classList.add('active');
         searchFormOpen = true;
@@ -504,8 +520,8 @@ function closeSearchForm() {
 }
 
 // Function that handles the search submit
-function handleSearchSubmit() {
-
+async function handleSearchSubmit() {
+    advancedSearch();
     closeSearchForm();
 }
 
@@ -514,8 +530,8 @@ function addTagRow() {
     const newTagRow = document.createElement('div');
     newTagRow.classList.add('search-input-row');
     newTagRow.innerHTML = `
-        <input type="text" class="search-input-outline" placeholder="Tag">
-        <input type="text" class="search-input-outline" placeholder="Description">
+        <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
+        <input type="text" class="search-input-outline search-description-input" placeholder="Description">
     `;
     tagsContainer.appendChild(newTagRow);
 }
@@ -551,14 +567,67 @@ async function simpleSearch(category) {
             loadPins();
         const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
         const pins = await response.json();
-        // if (!pins.length) {
-        //     loadPins();
-        // }
         placedPins.forEach(info => map.removeLayer(info.pin));
         placedPins.length = 0;
-        var latlngs = displayPins(pins); 
-        var bounds = new L.LatLngBounds(latlngs);
-        map.fitBounds(bounds);
+        if (pins && pins.length > 0) {
+            var latlngs = displayPins(pins); 
+            var bounds = new L.LatLngBounds(latlngs);
+            map.fitBounds(bounds);
+        }
+    } catch(err) {
+        console.error("Error searching:", err);
+    }
+}
+
+async function advancedSearch() {
+    const params = new URLSearchParams();
+    const categories = [];
+    const after = document.getElementById('search-after-input').value.trim();
+    const bbox = document.getElementById('search-bbox-input').value.trim();
+    
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+
+    const searchTags = Array.from(tagRows).map(pair => {
+        const tagInput = pair.querySelector('.search-tag-input');
+        const descriptionInput = pair.querySelector('.search-description-input');
+        const tag = tagInput.value.trim();
+        const description = descriptionInput.value.trim();
+        return { tag: tag, description: description };
+    });
+    searchTags.forEach(pair => {
+        if (pair.tag.toLowerCase() === 'category') {
+            categories.push(pair.description);
+        }
+    });
+    const tags = {};
+    searchTags.forEach(pair => {
+        if (pair.tag.toLowerCase() !== "category") {
+            tags[pair.tag] = pair.description;
+        }
+    });
+    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" && value.trim() !== ""));
+    if (categories && categories.length > 0) {
+        params.append("categories", categories);
+    }
+    if (bbox) params.append("bbox", bbox);
+    // if (after) params.append("after", after);
+    if (filteredTags && Object.keys(filteredTags).length > 0) {
+        for (const [key, value] of Object.entries(filteredTags)) {
+            params.append(`tags[${key}]`, value);
+        }
+    }
+    try {
+        if (params === '')
+            loadPins();
+        const response = await fetch(`/pins/advanced-search?${params.toString()}`);
+        const pins = await response.json();
+        placedPins.forEach(info => map.removeLayer(info.pin));
+        placedPins.length = 0;
+        if (pins && pins.length > 0) {
+            var latlngs = displayPins(pins); 
+            var bounds = new L.LatLngBounds(latlngs);
+            map.fitBounds(bounds);
+        }
     } catch(err) {
         console.error("Error searching:", err);
     }
