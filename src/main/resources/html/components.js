@@ -1,3 +1,5 @@
+tileLayerURL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+
 window.onload = async function () {
     await loadPins();
 }
@@ -9,9 +11,7 @@ var map = L.map('map', {
     attributionControl: false
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-}).addTo(map);
+L.tileLayer(tileLayerURL, { maxZoom: 19 }).addTo(map);
 
 const pinIcon = L.icon({
     iconUrl: './assets/pin-3.svg',
@@ -23,74 +23,55 @@ const reportIcon = L.icon({
     iconSize: [40, 40],
 });
 
-function getCSSVariable(variableName) {
-    return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
-}
-
-const eventCSSVariables = {
-    'event.restaurant': '--event-restaurant',
-    'story': '--story',
-    'event.bar': '--event-bar',
-    'event.park': '--event-park',
-    'event.museum': '--event-museum',
-    'event': '--event',
-    'found': '--found',
-    'lost': '--lost',
-    'default': '--default'
-};
-
 function createColoredPinIcon(color) {
     const svgContent = `
-        <svg width="800px" height="800px" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="${color}">
-            <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-            <g id="SVGRepo_iconCarrier">
-                <g id="Layer_2" data-name="Layer 2">
-                    <g id="invisible_box" data-name="invisible box">
-                        <rect width="48" height="48" fill="none"/>
-                    </g>
-                    <g id="icons_Q2" data-name="icons Q2">
-                        <path d="M24,4a12,12,0,0,0-2,23.8V42a2,2,0,0,0,4,0V27.8A12,12,0,0,0,24,4Zm0,16a4,4,0,1,1,4-4A4,4,0,0,1,24,20Z"/>
-                    </g>
-                </g>
-            </g>
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="800"
+            height="800"
+            viewBox="0 0 48 48"
+            fill="${color}"
+        >
+            <rect width="48" height="48" fill="none"/>
+            <path d="M24,4a12,12,0,0,0-2,23.8V42a2,2,0,0,0,4,0V27.8A12,12,0,0,0,24,4Zm0,16a4,4,0,1,1,4-4A4,4,0,0,1,24,20Z"/>
         </svg>
-    `;
-    
+    `.trim();
+
     const blob = new Blob([svgContent], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
-    
-    return L.icon({
+
+    const icon = L.icon({
         iconUrl: url,
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         popupAnchor: [0, -40]
     });
+
+    return icon;
+}
+
+// table of pin icons for different pin categories
+// maps category to svg icon
+const pinIconTable = {
+    '': createColoredPinIcon('#b79171'),  // default
+    'event': createColoredPinIcon('#d51fd8'),
+    'found': createColoredPinIcon('#1f7ed8'),
+    'lost': createColoredPinIcon('#6e58a2'),
+    'report': reportIcon,
+    'story': createColoredPinIcon('#834913')
 }
 
 function getIconForCategory(category) {
-    if (!category) return pinIcon;
-    
-    const categoryLower = category.toLowerCase();
-    
-    if (categoryLower.includes('report')) {
-        return reportIcon;
-    }
-    
-    // if (categoryLower.startsWith('event.')) {
-        const eventType = categoryLower;
-        const cssVariableName = eventCSSVariables[eventType];
-        
-        if (cssVariableName) {
-            const color = getCSSVariable(cssVariableName);
-            return createColoredPinIcon(color);
-        } else {
-            const defaultColor = getCSSVariable(eventCSSVariables['default']);
-            return createColoredPinIcon(defaultColor);
+    let current = category;
+    while (current !== '') {
+        if (pinIconTable.hasOwnProperty(current)) {
+            return pinIconTable[current];
         }
-    // }
-    
-    return pinIcon;
+        const lastDotIndex = current.lastIndexOf('.');
+        if (lastDotIndex === -1) break;
+        current = current.substring(0, lastDotIndex);
+    }
+    return pinIconTable[''];
 }
 
 const style = document.createElement('style');
@@ -133,13 +114,14 @@ function addListeners() {
     submitDescriptionButton.addEventListener('click', submitDescriptionHandler);
     cancelDescriptionButton.addEventListener('click', cancelDescriptionHandler);
 }
+
 const addDescriptionHandler = function () {
     const newDescriptionInput = document.createElement('div');
     newDescriptionInput.classList.add('description-input-group');
     newDescriptionInput.innerHTML = `
-                        <input type="text" class="tag-input" placeholder="Tag">
-                        <input type="text" class="description-input" placeholder="Enter description">
-                `;
+        <input type="text" class="tag-input" placeholder="Tag">
+        <input type="text" class="description-input" placeholder="Enter description">
+    `;
     descriptionContainer.appendChild(newDescriptionInput);
 };
 
@@ -160,7 +142,7 @@ const submitCreateHandler = async function () {
         const descriptionInput = group.querySelector('.description-input');
         tagInput.classList.remove('error');
         descriptionInput.classList.remove('error');
-        
+
         if (!tagInput.disabled && tagInput.value.trim() === '') {
             tagInput.classList.add('error');
             hasEmptyFields = true;
@@ -291,7 +273,7 @@ const submitEditHandler = async function () {
         if (response.ok) {
             const newIcon = getIconForCategory(category);
             currentPin.setIcon(newIcon);
-            
+
             pinInfo.tagsAndDescriptions = updatedTagsAndDescriptions;
             const newPopup = buildPopUpContent(updatedTagsAndDescriptions, placedPins.indexOf(pinInfo));
             currentPin.bindPopup(newPopup).openPopup();
@@ -441,7 +423,7 @@ function displayPinContent(tagsAndDescriptions) {
 map.on('click', function (e) {
     if (searchFormOpen)
         return;
-    
+
     let pinClicked = false;
     placedPins.forEach(pinInfo => {
         if (e.layerPoint && pinInfo.pin.getLatLng().equals(e.latlng)) {
@@ -491,7 +473,7 @@ async function loadPins() {
 // Function that opens the Advanced Search Form
 function openSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
-    
+
     if (searchFormOpen) {
         advancedSearchFormContainer.classList.add('hidden');
         searchButtonsContainer.classList.remove('active');
@@ -515,7 +497,7 @@ function openSearchForm() {
 // Function that closes the Advanced Search Form 
 function closeSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
-    
+
     advancedSearchFormContainer.classList.add('hidden');
     searchButtonsContainer.classList.remove('active');
     searchFormOpen = false;
@@ -594,10 +576,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 document.querySelector(".simple-search-svg").addEventListener("click", () => { simpleSearch(document.querySelector(".simple-search-text").value.trim()) }); // Listener for the Simple Search button (Magnifier Icon)
 document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
-
 
 const  followText = document.querySelector(".subscribe");  // Subscribe text button
 followText.addEventListener("click", () =>{
