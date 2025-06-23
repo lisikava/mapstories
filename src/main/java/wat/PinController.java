@@ -79,7 +79,8 @@ public class PinController {
         for (String key : rawTags.keySet()) {
             if (key.startsWith("tags[")) {
                 String tagKey = key.substring(5, key.length() - 1);
-                tags.put(tagKey, ctx.queryParam(key));
+                tags.put(tagKey, ctx.queryParam(key).isEmpty() ? null : ctx.queryParam(key));
+
             }
         }
         String jsonTags = null;
@@ -87,6 +88,7 @@ public class PinController {
             ObjectMapper mapper = new ObjectMapper();
             try {
                 jsonTags = mapper.writeValueAsString(tags);
+
             } catch (JsonProcessingException e) {
                 System.out.println(e);
             }

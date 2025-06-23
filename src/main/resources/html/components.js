@@ -503,7 +503,7 @@ function openSearchForm() {
             }
         }
         var currentBounds = [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]
-        document.getElementById('search-bbox-input').value = currentBounds;
+        document.getElementById('default-bbox-input').value = currentBounds;
         advancedSearchFormContainer.classList.remove('hidden');
         searchButtonsContainer.classList.add('active');
         searchFormOpen = true;
@@ -583,7 +583,7 @@ async function advancedSearch() {
     const params = new URLSearchParams();
     const categories = [];
     const after = document.getElementById('search-after-input').value.trim();
-    const bbox = document.getElementById('search-bbox-input').value.trim();
+    var bbox = document.getElementById('search-bbox-input').value.trim();
     
     const tagRows = tagsContainer.querySelectorAll('.search-input-row');
 
@@ -605,9 +605,12 @@ async function advancedSearch() {
             tags[pair.tag] = pair.description;
         }
     });
-    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" && value.trim() !== ""));
+    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" || value.trim() !== ""));
     if (categories && categories.length > 0) {
         params.append("categories", categories);
+    }
+    if (!bbox || bbox === "") {
+        bbox = document.getElementById('default-bbox-input').value.trim();
     }
     if (bbox) params.append("bbox", bbox);
     // if (after) params.append("after", after);
