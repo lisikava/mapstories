@@ -475,10 +475,13 @@ map.on('click', function (e) {
 
 async function loadPins() {
     try {
-        const response = await fetch('/pins');
+        var bounds = map.getBounds();
+        var bbox = getCurrentBounds();
+        const response = await fetch(`/pins?bbox=${encodeURIComponent(bbox)}`);
         const pins = await response.json();
         displayPins(pins);
-        map.setView([50.065870, 19.934727], 12);
+        map.fitBounds(bounds);
+        // map.setView([50.065870, 19.934727], 12);
     } catch (error) {
         console.error('Failed to load pins:', error);
     }
@@ -502,12 +505,17 @@ function openSearchForm() {
                 currentPin = null;
             }
         }
-        var currentBounds = [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng]
+        document.querySelector(".simple-search-text").value = "";
+        var currentBounds = getCurrentBounds();
         document.getElementById('default-bbox-input').value = currentBounds;
         advancedSearchFormContainer.classList.remove('hidden');
         searchButtonsContainer.classList.add('active');
         searchFormOpen = true;
     }
+}
+
+function getCurrentBounds() {
+    return [map.getBounds().getSouthWest().lat, map.getBounds().getSouthWest().lng, map.getBounds().getNorthEast().lat, map.getBounds().getNorthEast().lng];
 }
 
 // Function that closes the Advanced Search Form 
@@ -565,7 +573,12 @@ async function simpleSearch(category) {
     try {
         if (category === '')
             loadPins();
-        const response = await fetch(`/pins/search?category=${encodeURIComponent(category)}`);
+        const params = new URLSearchParams();
+        params.append("category", category);
+        // var bounds = map.getBounds();
+        var bbox = getCurrentBounds();
+        params.append("bbox", bbox);
+        const response = await fetch(`/pins/search?${params.toString()}`);
         const pins = await response.json();
         placedPins.forEach(info => map.removeLayer(info.pin));
         placedPins.length = 0;

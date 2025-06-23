@@ -24,7 +24,13 @@ public class PinController {
     }
 
     private void getAllPins(Context ctx) {
-        List<Pin> pins = Pin.retrieve("{}");
+        String bbox = ctx.queryParam("bbox");
+        StringBuilder pattern = new StringBuilder("{");
+        if (bbox != null && !bbox.trim().isEmpty()) {
+            bbox = parseBbox(bbox);
+            pattern.append(String.format("\"bbox\": \"%s\"", bbox));
+        }
+        List<Pin> pins = Pin.retrieve(pattern.append("}").toString());
         ctx.json(pins);
     }
 
@@ -57,8 +63,15 @@ public class PinController {
 
     private void search(Context ctx) {
         String category = ctx.queryParam("category");
-        String pattern = String.format("{\"categories\": [\"%s\"]}", category);
-        List<Pin> pins = Pin.retrieve(pattern);
+        String bbox = ctx.queryParam("bbox");
+        StringBuilder pattern = new StringBuilder("{");
+        pattern.append(String.format("\"categories\": [\"%s\"],", category));
+        if (bbox != null && !bbox.trim().isEmpty()) {
+            bbox = parseBbox(bbox);
+            pattern.append(String.format("\"bbox\": \"%s\"", bbox));
+        }
+//        String pattern = String.format("{\"categories\": [\"%s\"]}", category);
+        List<Pin> pins = Pin.retrieve(pattern.append("}").toString());
         ctx.json(pins);
     }
     private void advancedSearch(Context ctx) {
