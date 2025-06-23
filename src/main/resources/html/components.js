@@ -595,7 +595,7 @@ async function simpleSearch(category) {
 async function advancedSearch() {
     const params = new URLSearchParams();
     const categories = [];
-    const after = document.getElementById('search-after-input').value.trim();
+    const after = document.getElementById('search-after-input').value;
     var bbox = document.getElementById('search-bbox-input').value.trim();
     
     const tagRows = tagsContainer.querySelectorAll('.search-input-row');
@@ -626,7 +626,7 @@ async function advancedSearch() {
         bbox = document.getElementById('default-bbox-input').value.trim();
     }
     if (bbox) params.append("bbox", bbox);
-    // if (after) params.append("after", after);
+    if (after) params.append("after", after);
     if (filteredTags && Object.keys(filteredTags).length > 0) {
         for (const [key, value] of Object.entries(filteredTags)) {
             params.append(`tags[${key}]`, value);
