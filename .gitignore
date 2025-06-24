@@ -77,3 +77,5 @@ CVS/
 **/CVS/*
 .cvsignore
 */.cvsignore
+
+.env
