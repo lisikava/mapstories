@@ -19,7 +19,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostPhone));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundPhone));
         
-        boolean result = LostAndFoundMatcher.match(lostPhone, foundPhone);
+        boolean result = LostAndFoundMatcher.matchSync(lostPhone, foundPhone);
         System.out.println("Match result: " + result);
         System.out.println("===============================");
         
@@ -35,7 +35,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI WALLET/KEYS NO MATCH TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostWallet));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundKeys));
-        boolean result = LostAndFoundMatcher.match(lostWallet, foundKeys);
+        boolean result = LostAndFoundMatcher.matchSync(lostWallet, foundKeys);
         System.out.println("Match result: " + result);
         System.out.println("========================================");
         
@@ -51,7 +51,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI GLOVES COLOR TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(orangeGloves));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(whiteGloves));
-        boolean result = LostAndFoundMatcher.match(orangeGloves, whiteGloves);
+        boolean result = LostAndFoundMatcher.matchSync(orangeGloves, whiteGloves);
         System.out.println("Match result: " + result);
         System.out.println("================================");
         
@@ -67,7 +67,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI WALLET MATCH TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostWallet));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundWallet));
-        boolean result = LostAndFoundMatcher.match(lostWallet, foundWallet);
+        boolean result = LostAndFoundMatcher.matchSync(lostWallet, foundWallet);
         System.out.println("Match result: " + result);
         System.out.println("=================================");
         
@@ -83,7 +83,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI BRAND SYNONYMS TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostBackpack));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundBackpack));
-        boolean result = LostAndFoundMatcher.match(lostBackpack, foundBackpack);
+        boolean result = LostAndFoundMatcher.matchSync(lostBackpack, foundBackpack);
         System.out.println("Match result: " + result);
         System.out.println("===================================");
         
@@ -99,7 +99,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI SIZE DIFFERENCE TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostJacket));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundJacket));
-        boolean result = LostAndFoundMatcher.match(lostJacket, foundJacket);
+        boolean result = LostAndFoundMatcher.matchSync(lostJacket, foundJacket);
         System.out.println("Match result: " + result);
         System.out.println("====================================");
         
@@ -115,7 +115,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI JEWELRY PRECISION TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostRing));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundRing));
-        boolean result = LostAndFoundMatcher.match(lostRing, foundRing);
+        boolean result = LostAndFoundMatcher.matchSync(lostRing, foundRing);
         System.out.println("Match result: " + result);
         System.out.println("======================================");
         
@@ -131,7 +131,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI ELECTRONICS MATCH TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostLaptop));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundLaptop));
-        boolean result = LostAndFoundMatcher.match(lostLaptop, foundLaptop);
+        boolean result = LostAndFoundMatcher.matchSync(lostLaptop, foundLaptop);
         System.out.println("Match result: " + result);
         System.out.println("======================================");
         
@@ -147,7 +147,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI PET DESCRIPTIONS TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostDog));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundDog));
-        boolean result = LostAndFoundMatcher.match(lostDog, foundDog);
+        boolean result = LostAndFoundMatcher.matchSync(lostDog, foundDog);
         System.out.println("Match result: " + result);
         System.out.println("=====================================");
         
@@ -163,7 +163,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI CAR KEYS SPECIFICITY TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostKeys));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundKeys));
-        boolean result = LostAndFoundMatcher.match(lostKeys, foundKeys);
+        boolean result = LostAndFoundMatcher.matchSync(lostKeys, foundKeys);
         System.out.println("Match result: " + result);
         System.out.println("========================================");
         
@@ -179,7 +179,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI CLOTHING MATERIALS TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostScarf));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundScarf));
-        boolean result = LostAndFoundMatcher.match(lostScarf, foundScarf);
+        boolean result = LostAndFoundMatcher.matchSync(lostScarf, foundScarf);
         System.out.println("Match result: " + result);
         System.out.println("=======================================");
         
@@ -195,7 +195,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI BOOK MATCH TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostBook));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundBook));
-        boolean result = LostAndFoundMatcher.match(lostBook, foundBook);
+        boolean result = LostAndFoundMatcher.matchSync(lostBook, foundBook);
         System.out.println("Match result: " + result);
         System.out.println("===============================");
         
@@ -211,7 +211,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI WATCH PRECISION TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostWatch));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundWatch));
-        boolean result = LostAndFoundMatcher.match(lostWatch, foundWatch);
+        boolean result = LostAndFoundMatcher.matchSync(lostWatch, foundWatch);
         System.out.println("Match result: " + result);
         System.out.println("====================================");
         
@@ -227,7 +227,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI UMBRELLA COLOR TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostUmbrella));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundUmbrella));
-        boolean result = LostAndFoundMatcher.match(lostUmbrella, foundUmbrella);
+        boolean result = LostAndFoundMatcher.matchSync(lostUmbrella, foundUmbrella);
         System.out.println("Match result: " + result);
         System.out.println("===================================");
         
@@ -243,7 +243,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI GLASSES PRESCRIPTION TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostGlasses));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundGlasses));
-        boolean result = LostAndFoundMatcher.match(lostGlasses, foundGlasses);
+        boolean result = LostAndFoundMatcher.matchSync(lostGlasses, foundGlasses);
         System.out.println("Match result: " + result);
         System.out.println("=========================================");
         
@@ -259,7 +259,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI BAG SIZE FLEXIBILITY TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostBag));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundBag));
-        boolean result = LostAndFoundMatcher.match(lostBag, foundBag);
+        boolean result = LostAndFoundMatcher.matchSync(lostBag, foundBag);
         System.out.println("Match result: " + result);
         System.out.println("========================================");
         
@@ -275,7 +275,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI HEADPHONES WIRELESS TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostHeadphones));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundHeadphones));
-        boolean result = LostAndFoundMatcher.match(lostHeadphones, foundHeadphones);
+        boolean result = LostAndFoundMatcher.matchSync(lostHeadphones, foundHeadphones);
         System.out.println("Match result: " + result);
         System.out.println("========================================");
         
@@ -291,7 +291,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI CAT DESCRIPTION TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostCat));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundCat));
-        boolean result = LostAndFoundMatcher.match(lostCat, foundCat);
+        boolean result = LostAndFoundMatcher.matchSync(lostCat, foundCat);
         System.out.println("Match result: " + result);
         System.out.println("===================================");
         
@@ -307,7 +307,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI BICYCLE SPECIFICITY TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostBike));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundBike));
-        boolean result = LostAndFoundMatcher.match(lostBike, foundBike);
+        boolean result = LostAndFoundMatcher.matchSync(lostBike, foundBike);
         System.out.println("Match result: " + result);
         System.out.println("=======================================");
         
@@ -323,7 +323,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI TOOLS SIMILARITY TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostTool));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundTool));
-        boolean result = LostAndFoundMatcher.match(lostTool, foundTool);
+        boolean result = LostAndFoundMatcher.matchSync(lostTool, foundTool);
         System.out.println("Match result: " + result);
         System.out.println("=====================================");
         
@@ -339,7 +339,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI MEDICATION SAFETY TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostMeds));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundMeds));
-        boolean result = LostAndFoundMatcher.match(lostMeds, foundMeds);
+        boolean result = LostAndFoundMatcher.matchSync(lostMeds, foundMeds);
         System.out.println("Match result: " + result);
         System.out.println("======================================");
         
@@ -355,7 +355,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI CHILD TOY MATCH TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostToy));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundToy));
-        boolean result = LostAndFoundMatcher.match(lostToy, foundToy);
+        boolean result = LostAndFoundMatcher.matchSync(lostToy, foundToy);
         System.out.println("Match result: " + result);
         System.out.println("===================================");
         
@@ -371,7 +371,7 @@ public class LostAndFoundGeminiTest {
         System.out.println("=== GEMINI DOCUMENT IMPORTANCE TEST ===");
         System.out.println("Lost: " + LostAndFoundMatcher.preprocessPin(lostDoc));
         System.out.println("Found: " + LostAndFoundMatcher.preprocessPin(foundDoc));
-        boolean result = LostAndFoundMatcher.match(lostDoc, foundDoc);
+        boolean result = LostAndFoundMatcher.matchSync(lostDoc, foundDoc);
         System.out.println("Match result: " + result);
         System.out.println("=======================================");
         

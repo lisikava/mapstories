@@ -11,6 +11,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class LostAndFoundMatcher {
     
@@ -21,6 +24,8 @@ public class LostAndFoundMatcher {
             .connectTimeout(Duration.ofSeconds(30))
             .build();
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    
+    private static final Executor asyncExecutor = Executors.newFixedThreadPool(10);
     
     private static String getApiKey() {
         String key = dotenv.get("GEMINI_API_KEY");
@@ -47,29 +52,34 @@ public class LostAndFoundMatcher {
         return sb.toString().trim();
     }
     
-    public static boolean match(Pin lostPin, Pin foundPin) {
-        try {
-            String lostDescription = preprocessPin(lostPin);
-            String foundDescription = preprocessPin(foundPin);
-            
-            if (lostDescription.isEmpty() || foundDescription.isEmpty()) {
-                return false;
+    public static CompletableFuture<Boolean> match(Pin lostPin, Pin foundPin) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String lostDescription = preprocessPin(lostPin);
+                String foundDescription = preprocessPin(foundPin);
+                
+                if (lostDescription.isEmpty() || foundDescription.isEmpty()) {
+                    return false;
+                }
+                
+                boolean isMatch = askGeminiIfItemsMatch(lostDescription, foundDescription);
+                
+                System.out.println("Gemini match result: " + isMatch);
+                
+                return isMatch;
+                
+            } catch (Exception e) {
+                System.err.println("Error in matching pins with Gemini: " + e.getMessage());
+                System.err.println("Falling back to simple matching. Make sure .env file exists with GEMINI_API_KEY");
+                return simpleMatch(lostPin, foundPin);
             }
-            
-            boolean isMatch = askGeminiIfItemsMatch(lostDescription, foundDescription);
-            
-            System.out.println("Gemini match result: " + isMatch);
-            
-            return isMatch;
-            
-        } catch (Exception e) {
-            System.err.println("Error in matching pins with Gemini: " + e.getMessage());
-            System.err.println("Falling back to simple matching. Make sure .env file exists with GEMINI_API_KEY");
-            return simpleMatch(lostPin, foundPin);
-        }
+        }, asyncExecutor);
     }
     
-
+    //  Optional synchronous wrapper for backward compatibility
+    public static boolean matchSync(Pin lostPin, Pin foundPin) {
+        return match(lostPin, foundPin).join(); 
+    }
     
     private static boolean askGeminiIfItemsMatch(String lostDescription, String foundDescription) throws IOException, InterruptedException {
         if (API_KEY == null || API_KEY.isEmpty()) {
