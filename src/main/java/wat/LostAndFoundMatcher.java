@@ -56,14 +56,6 @@ public class LostAndFoundMatcher {
                 return false;
             }
             
-            if (lostPin.getCategory() != null && foundPin.getCategory() != null && 
-                !lostPin.getCategory().isEmpty() && !foundPin.getCategory().isEmpty()) {
-                
-                if (!areCategoriesRelated(lostPin.getCategory(), foundPin.getCategory())) {
-                    return false;
-                }
-            }
-            
             boolean isMatch = askGeminiIfItemsMatch(lostDescription, foundDescription);
             
             System.out.println("Gemini match result: " + isMatch);
@@ -77,36 +69,7 @@ public class LostAndFoundMatcher {
         }
     }
     
-    private static boolean areCategoriesRelated(String category1, String category2) {
-        String cat1Lower = category1.toLowerCase();
-        String cat2Lower = category2.toLowerCase();
-        
-        if (cat1Lower.equals(cat2Lower)) {
-            return true;
-        }
-        
-        if (cat1Lower.contains(cat2Lower) || cat2Lower.contains(cat1Lower)) {
-            return true;
-        }
-        
-        String[] lostPatterns = {"lost", "missing", "misplaced"};
-        String[] foundPatterns = {"found", "discovered", "located"};
-        
-        boolean cat1IsLost = false, cat1IsFound = false;
-        boolean cat2IsLost = false, cat2IsFound = false;
-        
-        for (String pattern : lostPatterns) {
-            if (cat1Lower.contains(pattern)) cat1IsLost = true;
-            if (cat2Lower.contains(pattern)) cat2IsLost = true;
-        }
-        
-        for (String pattern : foundPatterns) {
-            if (cat1Lower.contains(pattern)) cat1IsFound = true;
-            if (cat2Lower.contains(pattern)) cat2IsFound = true;
-        }
-        
-        return (cat1IsLost && cat2IsFound) || (cat1IsFound && cat2IsLost);
-    }
+
     
     private static boolean askGeminiIfItemsMatch(String lostDescription, String foundDescription) throws IOException, InterruptedException {
         if (API_KEY == null || API_KEY.isEmpty()) {
