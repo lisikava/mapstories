@@ -105,18 +105,12 @@ public class Pin {
                            conn.createArrayOf("text", tags.values().toArray())
             );
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                id = rs.getInt(1);
-                createTime = rs.getTimestamp(2);
-                updateTime = rs.getTimestamp(3);
-                if (rs.next()) {
-                    throw new SQLException("Insert returned multiple rows");
-                }
-            } else {
-                throw new SQLException("Insert returned no rows");
-            }
+            rs.next();
+            id = rs.getInt(1);
+            createTime = rs.getTimestamp(2);
+            updateTime = rs.getTimestamp(3);
         } catch (SQLException e) {
-            // TODO: exception handling
+            // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
         return new Pin(id, location, category, tags, createTime, updateTime);
@@ -144,6 +138,7 @@ public class Pin {
                 ));
             }
         } catch (SQLException | JsonProcessingException e) {
+            // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
         return foundPins;
@@ -167,17 +162,11 @@ public class Pin {
             );
             pstmt.setInt(5, id);
             ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                createTime = rs.getTimestamp(1);
-                updateTime = rs.getTimestamp(2);
-                if (rs.next()) {
-                    throw new SQLException("Update returned multiple rows");
-                }
-            } else {
-                throw new SQLException("Update returned no rows");
-            }
+            rs.next();
+            createTime = rs.getTimestamp(1);
+            updateTime = rs.getTimestamp(2);
         } catch (SQLException e) {
-            // TODO: handling
+            // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
         return new Pin(id, location, category, tags, createTime, updateTime);
@@ -188,9 +177,8 @@ public class Pin {
             PreparedStatement pstmt = conn.prepareStatement(deleteQuery);
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
-            assert (pstmt.getUpdateCount() == 1);
         } catch (SQLException e) {
-            // TODO: handling
+            // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
     }
