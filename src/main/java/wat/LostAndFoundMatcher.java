@@ -71,10 +71,14 @@ public class LostAndFoundMatcher {
     ) {
         if (properties.containsKey("api_key")) {
             String prompt = String.format(promptTemplate, lost, found);
-            return askGeminiIfItemsMatch(prompt);
-        } else {
-            return CompletableFuture.completedFuture(simpleMatch(lost, found));
+            try {
+                return askGeminiIfItemsMatch(prompt);
+            } catch (RuntimeException e) {
+                // TODO: logging
+            }
         }
+        // fallback
+        return CompletableFuture.completedFuture(simpleMatch(lost, found));
     }
 
     private static CompletableFuture<Boolean> askGeminiIfItemsMatch(String prompt) {
