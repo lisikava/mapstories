@@ -37,18 +37,19 @@
         
         <!-- Advanced Search Form -->
         <div id="advanced-search-form" class="hidden">
-            <div class="search-section">
-                <div class="search-section-header-with-button">
-                    <div class="search-section-header" style="background-color:#858585">Tags</div>
-                    <div class="search-buttons-group">
-                        <button type="button" id="add-tag-row" class="add-tag-row">+</button>
-                        <button type="button" id="remove-tag-row" class="remove-tag-row">-</button>
-                    </div>
+            <!-- Category input fields will be appended to the main search input -->
+            <div id="category-container" class="hidden">
+                <div class="search-input-row">
+                    <input type="text" class="search-input-outline search-category-input" placeholder="Category">
                 </div>
+            </div>
+            
+            <div class="search-section">
+                <div class="search-section-header" style="background-color:#858585">Tags</div>
                 <div id="tags-container">
                     <div class="search-input-row">
-                        <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
-                        <input type="text" class="search-input-outline search-description-input" placeholder="Description">
+                        <input type="text" class="search-input-outline search-tag-input inactive" placeholder="Tag">
+                        <input type="text" class="search-input-outline search-description-input inactive" placeholder="Description">
                     </div>
                 </div>
             </div>
