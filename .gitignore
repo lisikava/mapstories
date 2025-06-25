@@ -78,4 +78,6 @@ CVS/
 .cvsignore
 */.cvsignore
 
+#Configuration with passwords
 .env
+**/mailer-secrets.properties
