@@ -81,3 +81,4 @@ CVS/
 #Configuration with passwords
 **/gemini-secrets.properties
 **/mailer-secrets.properties
+.env
