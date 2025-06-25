@@ -89,11 +89,12 @@ const descriptionContainer = document.getElementById('description-container');
 const addCellButton = document.getElementById('add-cell');
 const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
-const searchContainer = document.getElementById('search-container');
-const advancedSearchForm = document.getElementById('advanced-search-form');
+const searchButton = document.getElementById('lasso-wrap');
+const advancedSearchFormContainer = document.getElementById('advanced-search-form-container');
 const searchCancelButton = document.getElementById('search-cancel');
 const searchSubmitButton = document.getElementById('search-submit');
-const categoryContainer = document.getElementById('category-container');
+const addTagRowButton = document.getElementById('add-tag-row');
+const removeTagRowButton = document.getElementById('remove-tag-row');
 const tagsContainer = document.getElementById('tags-container');
 
 let currentPin;
@@ -119,37 +120,13 @@ function clearAllFields() {
     document.querySelector(".simple-search-text").value = "";
     document.getElementById('search-bbox-input').value = "";
     document.getElementById('search-after-input').value = "";
-    
-    document.querySelector(".simple-search-text").classList.remove('inactive');
-    
-    // Clear category inputs appended to search container
-    const categoryRows = searchContainer.querySelectorAll('.search-input-row.category-row');
-    categoryRows.forEach(row => row.remove());
-    
-    // Clear tags container
-    clearTagsContainer();
-}
-
-function clearTagsContainer() {
-    const rows = tagsContainer.querySelectorAll('.search-input-row');
-    // Keep only the first row, clear its values
-    if (rows.length > 0) {
-        const firstRow = rows[0];
-        const tagInput = firstRow.querySelector('.search-tag-input');
-        const descInput = firstRow.querySelector('.search-description-input');
-        if (tagInput) {
-            tagInput.value = "";
-            tagInput.classList.add('inactive');
-        }
-        if (descInput) {
-            descInput.value = "";
-            descInput.classList.add('inactive');
-        }
-        // Remove additional rows
-        for (let i = 1; i < rows.length; i++) {
-            rows[i].remove();
-        }
-    }
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+    tagRows.forEach(pair => {
+        const tagInput = pair.querySelector('.search-tag-input');
+        const descriptionInput = pair.querySelector('.search-description-input');
+        tagInput.value = "";
+        descriptionInput.value = "";
+    });
 }
 
 const addDescriptionHandler = function () {
@@ -239,12 +216,6 @@ const submitCreateHandler = async function () {
     }
 
     pinsDescriptionContainer.classList.add('hidden');
-    
-    // Show search container when pin form is closed (unless advanced search is open)
-    if (!searchFormOpen) {
-        searchContainer.classList.remove('hidden');
-    }
-    
     currentPin = null;
     createFormOpen = false;
     removeListeners();
@@ -328,12 +299,6 @@ const submitEditHandler = async function () {
     }
 
     pinsDescriptionContainer.classList.add('hidden');
-    
-    // Show search container when pin form is closed (unless advanced search is open)
-    if (!searchFormOpen) {
-        searchContainer.classList.remove('hidden');
-    }
-    
     currentPin = null;
     createFormOpen = false;
     editFormOpen = false;
@@ -346,12 +311,6 @@ const cancelDescriptionHandler = function () {
         currentPin = null;
     }
     pinsDescriptionContainer.classList.add('hidden');
-    
-    // Show search container when pin form is closed (unless advanced search is open)
-    if (!searchFormOpen) {
-        searchContainer.classList.remove('hidden');
-    }
-    
     createFormOpen = false;
     editFormOpen = false;
     removeListeners();
@@ -415,10 +374,6 @@ function EditPin(pinIndex) {
     const pinInfo = placedPins[pinIndex];
     const tagsAndDescriptions = pinInfo.tagsAndDescriptions;
     if (!pinInfo) return;
-    
-    // Hide search container when edit form is active
-    searchContainer.classList.add('hidden');
-    
     pinsDescriptionContainer.classList.remove('hidden');
     createFormOpen = true;
     currentPin = pinInfo.pin;
@@ -427,6 +382,7 @@ function EditPin(pinIndex) {
     if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
         tagsAndDescriptions.forEach(pair => {
             const descriptionDiv = document.createElement('div');
+            descriptionDiv.classList.add('description-input-group');
             descriptionDiv.classList.add('description-input-group');
             descriptionDiv.innerHTML = `
                 <input type="text" class="tag-input" value="${pair.tag}" ${pair.tag === "Category" ? "disabled" : ""}>
@@ -493,13 +449,10 @@ map.on('click', function (e) {
     if (!pinClicked && !createFormOpen) {
         createFormOpen = true;
         editFormOpen = false;
-        
-        // Hide search container when pin creation form is active
-        searchContainer.classList.add('hidden');
-        
         pinsDescriptionContainer.classList.remove('hidden');
         descriptionContainer.innerHTML = `
                     <div class="description-input-group category-input-group">
+<!--                        <div class="category-label"><b>Category</b></div>-->
                         <input type="text" class="tag-input" disabled value="Category">
                         <input type="text" class="description-input" placeholder="Enter category">
                    </div>
@@ -510,12 +463,6 @@ map.on('click', function (e) {
         addListeners();
     } else if (!pinClicked && createFormOpen) {
         pinsDescriptionContainer.classList.add('hidden');
-        
-        // Show search container when pin creation form is closed (unless advanced search is open)
-        if (!searchFormOpen) {
-            searchContainer.classList.remove('hidden');
-        }
-        
         createFormOpen = false;
         if (currentPin && !editFormOpen) {
             map.removeLayer(currentPin);
@@ -545,12 +492,11 @@ function openSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
 
     if (searchFormOpen) {
-        advancedSearchForm.classList.add('hidden');
+        advancedSearchFormContainer.classList.add('hidden');
         searchButtonsContainer.classList.remove('active');
-        searchContainer.classList.remove('advanced-active');
         searchFormOpen = false;
-    } else {
-        // If pin creation form is open, close it first
+    }   // If the Advanced Search Form is already open, close Pins Description Container
+    else {
         if (createFormOpen) {
             pinsDescriptionContainer.classList.add('hidden');
             createFormOpen = false;
@@ -558,16 +504,12 @@ function openSearchForm() {
                 map.removeLayer(currentPin);
                 currentPin = null;
             }
-            // Show search container since pin form is closed
-            searchContainer.classList.remove('hidden');
         }
-        
         document.querySelector(".simple-search-text").value = "";
         var currentBounds = getCurrentBounds();
         document.getElementById('default-bbox-input').value = currentBounds;
-        advancedSearchForm.classList.remove('hidden');
+        advancedSearchFormContainer.classList.remove('hidden');
         searchButtonsContainer.classList.add('active');
-        searchContainer.classList.add('advanced-active');
         searchFormOpen = true;
     }
 }
@@ -580,9 +522,8 @@ function getCurrentBounds() {
 function closeSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
 
-    advancedSearchForm.classList.add('hidden');
+    advancedSearchFormContainer.classList.add('hidden');
     searchButtonsContainer.classList.remove('active');
-    searchContainer.classList.remove('advanced-active');
     searchFormOpen = false;
 }
 
@@ -592,116 +533,23 @@ async function handleSearchSubmit() {
     closeSearchForm();
 }
 
-// Function to add new category input row to search container
-function addCategoryInputRow() {
-    const newRow = document.createElement('div');
-    newRow.classList.add('search-input-row', 'category-row');
-    newRow.innerHTML = `<input type="text" class="search-input-outline search-category-input inactive" placeholder="Category">`;
-    
-    // Insert after the simple search form
-    const simpleForm = document.getElementById('simple-search-form');
-    simpleForm.parentNode.insertBefore(newRow, simpleForm.nextSibling);
-    
-    // Add event listener to the new input
-    const newInput = newRow.querySelector('input');
-    setupCategoryInputEvents(newInput);
-}
-
-// Function to add new tag+description row
+// Function to add new tag + description row
 function addTagRow() {
-    const newRow = document.createElement('div');
-    newRow.classList.add('search-input-row');
-    newRow.innerHTML = `
-        <input type="text" class="search-input-outline search-tag-input inactive" placeholder="Tag">
-        <input type="text" class="search-input-outline search-description-input inactive" placeholder="Description">
+    const newTagRow = document.createElement('div');
+    newTagRow.classList.add('search-input-row');
+    newTagRow.innerHTML = `
+        <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
+        <input type="text" class="search-input-outline search-description-input" placeholder="Description">
     `;
-    tagsContainer.appendChild(newRow);
-    
-    // Add event listeners to both inputs
-    const tagInput = newRow.querySelector('.search-tag-input');
-    const descInput = newRow.querySelector('.search-description-input');
-    setupTagInputEvents(tagInput, descInput);
+    tagsContainer.appendChild(newTagRow);
 }
 
-// Function to setup event listeners for category inputs
-function setupCategoryInputEvents(input) {
-    input.addEventListener('input', function() {
-        // Remove inactive class when user starts typing
-        if (this.value.trim() !== '') {
-            this.classList.remove('inactive');
-        } else {
-            this.classList.add('inactive');
-        }
-        
-        // Check if we need to add a new empty input
-        const allCategoryInputs = searchContainer.querySelectorAll('.search-input-row.category-row .search-category-input');
-        const hasEmptyInput = Array.from(allCategoryInputs).some(inp => inp.value.trim() === '');
-        
-        if (!hasEmptyInput && this.value.trim() !== '') {
-            addCategoryInputRow();
-        }
-    });
-    
-    input.addEventListener('blur', function() {
-        if (this.value.trim() === '') {
-            const allCategoryInputs = searchContainer.querySelectorAll('.search-input-row.category-row .search-category-input');
-            if (allCategoryInputs.length > 1) {
-                this.closest('.search-input-row').remove();
-            } else {
-                this.classList.add('inactive');
-            }
-        }
-    });
-}
-
-function setupTagInputEvents(tagInput, descInput) {
-    const handleInput = function() {
-        if (this.value.trim() !== '') {
-            this.classList.remove('inactive');
-        } else {
-            this.classList.add('inactive');
-        }
-        
-        const currentRow = this.closest('.search-input-row');
-        const tagVal = currentRow.querySelector('.search-tag-input').value.trim();
-        const descVal = currentRow.querySelector('.search-description-input').value.trim();
-        
-        if (tagVal !== '' && descVal !== '') {
-            const allRows = tagsContainer.querySelectorAll('.search-input-row');
-            const hasEmptyRow = Array.from(allRows).some(row => {
-                const tag = row.querySelector('.search-tag-input').value.trim();
-                const desc = row.querySelector('.search-description-input').value.trim();
-                return tag === '' && desc === '';
-            });
-            
-            if (!hasEmptyRow) {
-                addTagRow();
-            }
-        }
-    };
-    
-    const handleBlur = function() {
-        const currentRow = this.closest('.search-input-row');
-        const tagVal = currentRow.querySelector('.search-tag-input').value.trim();
-        const descVal = currentRow.querySelector('.search-description-input').value.trim();
-        
-        if (tagVal === '' && descVal === '') {
-            const allRows = tagsContainer.querySelectorAll('.search-input-row');
-            const isFirstRow = currentRow === allRows[0];
-            
-            if (!isFirstRow) {
-                currentRow.remove();
-            } else {
-                currentRow.querySelector('.search-tag-input').classList.add('inactive');
-                currentRow.querySelector('.search-description-input').classList.add('inactive');
-            }
-        }
-    };
-    
-    tagInput.addEventListener('input', handleInput);
-    descInput.addEventListener('input', handleInput);
-    tagInput.addEventListener('blur', handleBlur);
-    descInput.addEventListener('blur', handleBlur);
+function removeTagRow() {
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+    if (tagRows.length > 1) {
+        const lastRow = tagRows[tagRows.length - 1];
+        tagsContainer.removeChild(lastRow);
+    }
 }
 
 function displayPins(pins) {
@@ -750,37 +598,27 @@ async function advancedSearch() {
     const after = document.getElementById('search-after-input').value;
     var bbox = document.getElementById('search-bbox-input').value.trim();
     
-    // Get categories from main search input and additional category inputs
-    const mainSearchValue = document.querySelector('.simple-search-text').value.trim();
-    if (mainSearchValue !== '') {
-        categories.push(mainSearchValue);
-    }
-    
-    const categoryInputs = searchContainer.querySelectorAll('.search-category-input');
-    categoryInputs.forEach(input => {
-        const value = input.value.trim();
-        if (value !== '') {
-            categories.push(value);
-        }
-    });
-    
-    // Get tags from tag/description pairs
-    const tags = {};
     const tagRows = tagsContainer.querySelectorAll('.search-input-row');
-    
-    tagRows.forEach((row, index) => {
-        const tagInput = row.querySelector('.search-tag-input');
-        const descInput = row.querySelector('.search-description-input');
-        const tagValue = tagInput ? tagInput.value.trim() : '';
-        const descValue = descInput ? descInput.value.trim() : '';
-        
-        if (tagValue !== '' && descValue !== '') {
-            tags[tagValue] = descValue;
+
+    const searchTags = Array.from(tagRows).map(pair => {
+        const tagInput = pair.querySelector('.search-tag-input');
+        const descriptionInput = pair.querySelector('.search-description-input');
+        const tag = tagInput.value.trim();
+        const description = descriptionInput.value.trim();
+        return { tag: tag, description: description };
+    });
+    searchTags.forEach(pair => {
+        if (pair.tag.toLowerCase() === 'category') {
+            categories.push(pair.description);
         }
     });
-    
-    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" && value.trim() !== ""));
-    
+    const tags = {};
+    searchTags.forEach(pair => {
+        if (pair.tag.toLowerCase() !== "category") {
+            tags[pair.tag] = pair.description;
+        }
+    });
+    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" || value.trim() !== ""));
     if (categories && categories.length > 0) {
         params.append("categories", categories);
     }
@@ -795,7 +633,7 @@ async function advancedSearch() {
         }
     }
     try {
-        if (params.toString() === '')
+        if (params === '')
             loadPins();
         const response = await fetch(`/pins/advanced-search?${params.toString()}`);
         const pins = await response.json();
@@ -813,43 +651,8 @@ async function advancedSearch() {
 
 searchCancelButton.addEventListener('click', closeSearchForm);           //  Listener for the Cancel button that closes the Advanced Search Form
 searchSubmitButton.addEventListener('click', handleSearchSubmit); //  Listener for the Advanced Search button (Search button)
-
-// Initialize dynamic input behavior
-function initializeDynamicInputs() {
-    // Setup event listeners for existing tag/description inputs
-    const tagInput = tagsContainer.querySelector('.search-tag-input');
-    const descriptionInput = tagsContainer.querySelector('.search-description-input');
-    
-    // The first Tag and Description inputs should be cream-colored (not inactive)
-    if (tagInput && descriptionInput) {
-        setupTagInputEvents(tagInput, descriptionInput);
-    }
-    
-    const mainSearchInput = document.querySelector('.simple-search-text');
-    
-    if (mainSearchInput) {
-        mainSearchInput.addEventListener('input', function() {
-            const isAdvancedActive = searchContainer.classList.contains('advanced-active');
-            
-            if (this.value.trim() !== '' && isAdvancedActive) {
-                const existingCategoryInputs = searchContainer.querySelectorAll('.search-input-row.category-row .search-category-input');
-                if (existingCategoryInputs.length === 0) {
-                    addCategoryInputRow();
-                }
-            } else if (this.value.trim() === '' && isAdvancedActive) {
-                const categoryRows = searchContainer.querySelectorAll('.search-input-row.category-row');
-                categoryRows.forEach(row => {
-                    const input = row.querySelector('.search-category-input');
-                    if (input && input.value.trim() === '') {
-                        row.remove();
-                    }
-                });
-            }
-        });
-    }
-}
-
-document.addEventListener('DOMContentLoaded', initializeDynamicInputs);
+addTagRowButton.addEventListener('click', addTagRow);             //  Listener for the Add Tag Row button
+removeTagRowButton.addEventListener('click', removeTagRow);       //  Listener for the Remove Tag Row button
 
 document.addEventListener('DOMContentLoaded', function() {
     const advancedButton = document.querySelector('.advanced-search-button');

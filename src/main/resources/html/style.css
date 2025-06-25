@@ -47,7 +47,6 @@ nav {
     z-index: 999;
 }
 
-/* Search Container positioned over the map */
 #search-container {
     position: absolute;
     width: 26vw;
