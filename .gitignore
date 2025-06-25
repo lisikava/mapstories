@@ -79,5 +79,5 @@ CVS/
 */.cvsignore
 
 #Configuration with passwords
-.env
+**/gemini-secrets.properties
 **/mailer-secrets.properties
