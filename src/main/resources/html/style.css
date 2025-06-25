@@ -39,7 +39,7 @@ nav {
     background-color: rgba(0, 0, 0, 0.268);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     position: fixed;
     top: 1%;
     left: 50%;
@@ -47,35 +47,81 @@ nav {
     z-index: 999;
 }
 
+/* Search Container positioned over the map */
+#search-container {
+    position: absolute;
+    width: 350px;
+    top: 20%;
+    left: 2%;
+    z-index: 1000;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: var(--color-lgray);
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition:
+        opacity 0.3s cubic-bezier(.77, 0, .175, 1),
+        visibility 0.3s cubic-bezier(.77, 0, .175, 1),
+        transform 0.3s cubic-bezier(.77, 0, .175, 1);
+}
+
+#search-container.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-20px);
+}
+
+#simple-search-form {
+    display: flex;
+    align-items: center;
+    /* gap: 8px */
+}
+
+#advanced-search-form {
+    margin-top: 15px;
+    max-height: calc(60vh);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+#advanced-search-form.hidden {
+    display: none;
+}
+
 body {
     font-family: "Roboto", sans-serif;
 }
 
-.search-section-left {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-}
-
 .simple-search-text {
-    font-size: 40px;
-    letter-spacing: 3px;
+    font-size: 18px;
+    letter-spacing: 1px;
     line-height: 1.1;
     color: var(--color-creme);
     background-color: transparent;
     border: none;
     outline: none;
-    max-width: 10vw;
-    padding-left: 6vw;
+    width: 170px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.simple-search-text::placeholder {
+    color: var(--color-creme);
+    opacity: 0.7;
 }
 
 .search-buttons-container {
     display: flex;
     align-items: center;
     position: relative;
-    width: 200px;
-    height: 50px;
-    right: 100px;
+    width: 20vw;
+    height: 35px;
+    margin-left: -60px;
 }
 
 .advanced-search-button {
@@ -85,9 +131,9 @@ body {
     text-indent: -999px;
     overflow: hidden;
     border: 2px solid var(--gold-color);
-    border-radius: 30px;
-    width: 50px;
-    height: 50px;
+    border-radius: 20px;
+    width: 35px;
+    height: 35px;
     margin: auto;
     left: 0;
     right: 0;
@@ -109,14 +155,14 @@ body {
     color: var(--gold-color);
     position: absolute;
     display: block;
-    left: 143px;
+    left: 150px;
     right: 0;
-    top: 12px;
-    width: 70px;
+    top: 6px;
+    width: 60px;
     font-family: 'Roboto', sans-serif;
     letter-spacing: 0.07em;
-    font-size: 14px;
-    line-height: 28px;
+    font-size: 12px;
+    line-height: 24px;
     font-weight: normal;
     text-align: center;
     text-transform: uppercase;
@@ -131,8 +177,8 @@ body {
 
 svg.simple-search-svg {
     position: absolute;
-    width: 40px;
-    left: -12px;
+    width: 28px;
+    left: -8px;
     right: 0;
     margin: auto;
     top: 50%;
@@ -146,9 +192,9 @@ svg.simple-search-svg {
     position: absolute;
     z-index: 1;
     border: 2px solid var(--gold-color);
-    border-radius: 30px;
-    width: 50px;
-    height: 50px;
+    border-radius: 20px;
+    width: 35px;
+    height: 35px;
     left: 0px;
     right: 0;
     margin: auto;
@@ -175,13 +221,13 @@ svg.simple-search-svg {
 .search-buttons-container:hover .advanced-search-button,
 .search-buttons-container.active .advanced-search-button {
     z-index: 3;
-    width: 110px;
+    width: 80px;
     margin: auto;
     text-indent: 0;
     text-align: center;
     opacity: 100;
     filter: alpha(opacity=100);
-    left: 128px;
+    left: 130px;
 }
 
 .search-buttons-container:hover .advanced-search-text,
@@ -203,11 +249,7 @@ svg.simple-search-svg {
     font-size: 70px;
     text-align: center;
     color: var(--gold-color);
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
 }
 
 #pins-description-container {

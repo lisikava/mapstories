@@ -89,8 +89,8 @@ const descriptionContainer = document.getElementById('description-container');
 const addCellButton = document.getElementById('add-cell');
 const submitDescriptionButton = document.getElementById('submit-description');
 const cancelDescriptionButton = document.getElementById('cancel-description');
-const searchButton = document.getElementById('lasso-wrap');
-const advancedSearchFormContainer = document.getElementById('advanced-search-form-container');
+const searchContainer = document.getElementById('search-container');
+const advancedSearchForm = document.getElementById('advanced-search-form');
 const searchCancelButton = document.getElementById('search-cancel');
 const searchSubmitButton = document.getElementById('search-submit');
 const addTagRowButton = document.getElementById('add-tag-row');
@@ -216,6 +216,12 @@ const submitCreateHandler = async function () {
     }
 
     pinsDescriptionContainer.classList.add('hidden');
+    
+    // Show search container when pin form is closed (unless advanced search is open)
+    if (!searchFormOpen) {
+        searchContainer.classList.remove('hidden');
+    }
+    
     currentPin = null;
     createFormOpen = false;
     removeListeners();
@@ -299,6 +305,12 @@ const submitEditHandler = async function () {
     }
 
     pinsDescriptionContainer.classList.add('hidden');
+    
+    // Show search container when pin form is closed (unless advanced search is open)
+    if (!searchFormOpen) {
+        searchContainer.classList.remove('hidden');
+    }
+    
     currentPin = null;
     createFormOpen = false;
     editFormOpen = false;
@@ -311,6 +323,12 @@ const cancelDescriptionHandler = function () {
         currentPin = null;
     }
     pinsDescriptionContainer.classList.add('hidden');
+    
+    // Show search container when pin form is closed (unless advanced search is open)
+    if (!searchFormOpen) {
+        searchContainer.classList.remove('hidden');
+    }
+    
     createFormOpen = false;
     editFormOpen = false;
     removeListeners();
@@ -374,6 +392,10 @@ function EditPin(pinIndex) {
     const pinInfo = placedPins[pinIndex];
     const tagsAndDescriptions = pinInfo.tagsAndDescriptions;
     if (!pinInfo) return;
+    
+    // Hide search container when edit form is active
+    searchContainer.classList.add('hidden');
+    
     pinsDescriptionContainer.classList.remove('hidden');
     createFormOpen = true;
     currentPin = pinInfo.pin;
@@ -382,7 +404,6 @@ function EditPin(pinIndex) {
     if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
         tagsAndDescriptions.forEach(pair => {
             const descriptionDiv = document.createElement('div');
-            descriptionDiv.classList.add('description-input-group');
             descriptionDiv.classList.add('description-input-group');
             descriptionDiv.innerHTML = `
                 <input type="text" class="tag-input" value="${pair.tag}" ${pair.tag === "Category" ? "disabled" : ""}>
@@ -449,10 +470,13 @@ map.on('click', function (e) {
     if (!pinClicked && !createFormOpen) {
         createFormOpen = true;
         editFormOpen = false;
+        
+        // Hide search container when pin creation form is active
+        searchContainer.classList.add('hidden');
+        
         pinsDescriptionContainer.classList.remove('hidden');
         descriptionContainer.innerHTML = `
                     <div class="description-input-group category-input-group">
-<!--                        <div class="category-label"><b>Category</b></div>-->
                         <input type="text" class="tag-input" disabled value="Category">
                         <input type="text" class="description-input" placeholder="Enter category">
                    </div>
@@ -463,6 +487,12 @@ map.on('click', function (e) {
         addListeners();
     } else if (!pinClicked && createFormOpen) {
         pinsDescriptionContainer.classList.add('hidden');
+        
+        // Show search container when pin creation form is closed
+        if (!searchFormOpen) {
+            searchContainer.classList.remove('hidden');
+        }
+        
         createFormOpen = false;
         if (currentPin && !editFormOpen) {
             map.removeLayer(currentPin);
@@ -492,11 +522,11 @@ function openSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
 
     if (searchFormOpen) {
-        advancedSearchFormContainer.classList.add('hidden');
+        advancedSearchForm.classList.add('hidden');
         searchButtonsContainer.classList.remove('active');
         searchFormOpen = false;
-    }   // If the Advanced Search Form is already open, close Pins Description Container
-    else {
+    } else {
+        // If pin creation form is open, close it first
         if (createFormOpen) {
             pinsDescriptionContainer.classList.add('hidden');
             createFormOpen = false;
@@ -504,11 +534,14 @@ function openSearchForm() {
                 map.removeLayer(currentPin);
                 currentPin = null;
             }
+            // Show search container since pin form is closed
+            searchContainer.classList.remove('hidden');
         }
+        
         document.querySelector(".simple-search-text").value = "";
         var currentBounds = getCurrentBounds();
         document.getElementById('default-bbox-input').value = currentBounds;
-        advancedSearchFormContainer.classList.remove('hidden');
+        advancedSearchForm.classList.remove('hidden');
         searchButtonsContainer.classList.add('active');
         searchFormOpen = true;
     }
@@ -522,7 +555,7 @@ function getCurrentBounds() {
 function closeSearchForm() {
     const searchButtonsContainer = document.querySelector('.search-buttons-container');
 
-    advancedSearchFormContainer.classList.add('hidden');
+    advancedSearchForm.classList.add('hidden');
     searchButtonsContainer.classList.remove('active');
     searchFormOpen = false;
 }

@@ -17,21 +17,77 @@
 
 <body>
     <nav>
-        <div class="search-section-left">
-            <input class="simple-search-text" name="category" type="text" placeholder="Search"/>
-            <div class="search-buttons-container">
-                <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24"> <!-- Magnifier icon (Button for Simple Search)-->
-                    <circle cx="17" cy="10" r="6" fill="none" stroke="#d8791f" stroke-width="1"/>
-                    <line x1="14" y1="15.2" x2="10" y2="21" stroke="#d8791f" stroke-width="1" stroke-linecap="round"/>
-                </svg> <!-- Magnifier icon -->
-                <div class="simple-search-button-outline"></div>
-                <div class="advanced-search-text">advanced</div>
-                <div class="advanced-search-button"> <!-- Advanced Search button that opens the Advanced Search Form -->
-                </div>
-            </div>
-        </div>
         <div class="app-name">MapStories</div>
     </nav>
+    
+    <!-- Search Container positioned over the map -->
+    <div id="search-container">
+        <div id="simple-search-form">
+            <input class="simple-search-text" name="category" type="text" placeholder="Search"/>
+            <div class="search-buttons-container">
+                <svg class="simple-search-svg" version="1.1" xmlns="http://www.w3.org/2000/svg" width="40px" height="40px" viewBox="0 0 24 24">
+                    <circle cx="17" cy="10" r="6" fill="none" stroke="#d8791f" stroke-width="1"/>
+                    <line x1="14" y1="15.2" x2="10" y2="21" stroke="#d8791f" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+                <div class="simple-search-button-outline"></div>
+                <div class="advanced-search-text">advanced</div>
+                <div class="advanced-search-button"></div>
+            </div>
+        </div>
+        
+        <!-- Advanced Search Form -->
+        <div id="advanced-search-form" class="hidden">
+            <div class="search-section">
+                <div class="search-section-header-with-button">
+                    <div class="search-section-header" style="background-color:#858585">Tags</div>
+                    <div class="search-buttons-group">
+                        <button type="button" id="add-tag-row" class="add-tag-row">+</button>
+                        <button type="button" id="remove-tag-row" class="remove-tag-row">-</button>
+                    </div>
+                </div>
+                <div id="tags-container">
+                    <div class="search-input-row">
+                        <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
+                        <input type="text" class="search-input-outline search-description-input" placeholder="Description">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <div class="search-section-header" style="background-color:#858585">Created after</div>
+                <div class="search-input-row">
+                    <input type="datetime-local" class="search-input-outline" id="search-after-input" >
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <div class="search-section-header" style="background-color:#858585">Bounding Box</div>
+                <div class="search-input-row">
+                    <input type="text" class="search-input-outline" id="search-bbox-input" placeholder="Enter coordinates">
+                    <input id="default-bbox-input" type="hidden">
+                </div>
+            </div>
+             
+            <div class="search-section">
+                <div class="search-section-header subscribe">Subscribe</div>
+                <div class="search-input-row">
+                    <input type="text" class="search-input-outline hidden" placeholder="Enter your email">
+                    <button type="button" class="email-button-outline hidden">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button> 
+                </div>
+            </div>
+            
+            <div class="search-controls">
+                <button type="button" id="search-cancel" class="search-button-style search-cancel">Cancel</button>
+                <button type="button" id="search-submit" class="search-button-style search-submit">Search</button>
+            </div>
+        </div>
+    </div>
+    
     <div id="map"></div>
     <div id="pins-description-container" class="hidden">
         <div id="description-container">
@@ -46,58 +102,6 @@
             <button type="button" id="submit-description" class="submit-description">Submit</button>
         </div>
     </div>
-    <!-- Advanced Search Form Container -->
-    <div id="advanced-search-form-container" class="hidden">
-        <div class="search-section">
-            <div class="search-section-header-with-button">
-                <div class="search-section-header" style="background-color:#858585">Tags</div>
-                <div class="search-buttons-group">
-                    <button type="button" id="add-tag-row" class="add-tag-row">+</button>
-                    <button type="button" id="remove-tag-row" class="remove-tag-row">-</button>
-                </div>
-            </div>
-            <div id="tags-container">
-                <div class="search-input-row">
-                    <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
-                    <input type="text" class="search-input-outline search-description-input" placeholder="Description">
-                </div>
-            </div>
-        </div>
-        
-        <div class="search-section">
-            <div class="search-section-header" style="background-color:#858585">Created after</div>
-            <div class="search-input-row">
-                <input type="datetime-local" class="search-input-outline" id="search-after-input" >
-            </div>
-        </div>
-        
-        <div class="search-section">
-            <div class="search-section-header" style="background-color:#858585">Bounding Box</div>
-            <div class="search-input-row">
-                <input type="text" class="search-input-outline" id="search-bbox-input" placeholder="Enter coordinates">
-                <input id="default-bbox-input" type="hidden">
-            </div>
-        </div>
-         
-        <div class="search-section">
-            <div class="search-section-header subscribe">Subscribe</div>
-            <div class="search-input-row">
-                <input type="text" class="search-input-outline hidden" placeholder="Enter your email">
-                <button type="button" class="email-button-outline hidden">                                                              <!-- Email button that sends an email to the user -->
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>   <!-- Email button that sends an email to the user -->
-                </button> 
-            </div>
-        </div>
-        
-        <div class="search-controls">
-            <button type="button" id="search-cancel" class="search-button-style search-cancel">Cancel</button> <!-- Cancel button that closes the Advanced Search Form -->
-            <button type="button" id="search-submit" class="search-button-style search-submit">Search</button> <!-- Search button that searches for pins -->
-        </div>
-    </div>
-    <!-- Advanced Search Form Container -->
 </body>
 
 <script src="components.js"></script>
