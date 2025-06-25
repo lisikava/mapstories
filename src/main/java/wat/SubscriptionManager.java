@@ -21,8 +21,31 @@ public class SubscriptionManager {
             insert into subscriptions(email, pattern, tz_offset)
             values(?, ?, ?)
             returning id""";
-    // TODO: query that outputs pin counts for each user in their timezone
+    // TODO: query that outputs pin counts for each user
     private static final String updateSubscriptionsQuery = """
+            """;
+
+    private static final String welcomeEmail = """
+            Hi avid Storyteller!
+            
+            You have been subscribed for Mapstories updates.
+            
+            Yours faithfully,
+            John Mapstory - Java Mail Bot
+            
+            Unsubscribe with http://localhost:7070/subscriptions/%d
+            """;
+
+    private static final String digestEmail = """
+            Hi avid Storyteller!
+            
+            Your subscription to Mapstories has %d updates.
+            
+            Yours faithfully,
+            John Mapstory - Java Mail Bot
+            
+            View them at http://localhost:7070/search?pattern=%s
+            Unsubscribe with http://localhost:7070/subscriptions/%d
             """;
 
     private SubscriptionManager() {}
@@ -79,22 +102,38 @@ public class SubscriptionManager {
             pstmt.setInt(1, period);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
+                int id = rs.getInt("id");
                 int updates = rs.getInt("updates");
                 if (updates == 0) continue;
                 String email = rs.getString("email");
                 String pattern = rs.getString("pattern");
-                composeEmail(email, pattern, updates);
+                sendDigest(email, id, pattern, updates);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void composeEmail(String email,
-                                     String pattern,
-                                     int updates
+    private static void sendDigest(String email,
+                                   int subscriptionId,
+                                   String pattern,
+                                   int updates
     ) {
-        // TODO: angus-mail to send emails
+        EmailSender.composeEmail(email,
+                                 "Your Mapstories digest",
+                                 String.format(digestEmail,
+                                               updates,
+                                               pattern,
+                                               subscriptionId
+                                 )
+        );
+    }
+
+    private static void sendWelcome(String email, int subscriptionId) {
+        EmailSender.composeEmail(email,
+                                 "Welcome to Mapstories",
+                                 String.format(welcomeEmail, subscriptionId)
+        );
     }
 
     public static void subscribe(String email,
@@ -108,7 +147,8 @@ public class SubscriptionManager {
             pstmt.setInt(3, timezoneOffset);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
-//            Integer id = rs.getInt(1); // TODO: welcome email
+            int id = rs.getInt(1); // TODO: welcome email
+            sendWelcome(email, id);
         } catch (SQLException e) {
             // TODO: exception handling in controllers
             throw new RuntimeException(e);
