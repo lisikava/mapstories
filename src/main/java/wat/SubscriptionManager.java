@@ -21,9 +21,13 @@ public class SubscriptionManager {
             insert into subscriptions(email, pattern, tz_offset)
             values(?, ?, ?)
             returning id""";
-    // TODO: query that outputs pin counts for each user
-    private static final String updateSubscriptionsQuery = """
+    // TODO: query that outputs count of newly updated pins for each user
+    private static final String digestUpdateQuery = """
             """;
+
+    private static final String unsubscribeQuery = """
+            delete from subscriptions
+            where id = ?""";
 
     private static final String welcomeEmail = """
             Hi avid Storyteller!
@@ -87,24 +91,21 @@ public class SubscriptionManager {
 
     /**
      * Update subscriptions.
-     * TODO: enable local updates with arbitrary period
+     * TODO: in perspective, enable local updates with arbitrary period
      *
      * @param period period in minutes
      */
     private static void updateSubscriptions(int period) {
-        LocalTime thisMoment = LocalTime.now();
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement pstmt =
-                    conn.prepareStatement(updateSubscriptionsQuery);
-            conn.prepareStatement(updateSubscriptionsQuery);
-//            LocalTime currentTime =
-//                    LocalTime.of(thisMoment.getHour(), thisMoment.getMinute());
+            PreparedStatement pstmt = conn.prepareStatement(digestUpdateQuery);
+            conn.prepareStatement(digestUpdateQuery);
             pstmt.setInt(1, period);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
                 int updates = rs.getInt("updates");
-                if (updates == 0) continue;
+                if (updates == 0) // nothing to inform of
+                    continue;
+                int id = rs.getInt("id");
                 String email = rs.getString("email");
                 String pattern = rs.getString("pattern");
                 sendDigest(email, id, pattern, updates);
@@ -147,8 +148,19 @@ public class SubscriptionManager {
             pstmt.setInt(3, timezoneOffset);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
-            int id = rs.getInt(1); // TODO: welcome email
+            int id = rs.getInt(1);
             sendWelcome(email, id);
+        } catch (SQLException e) {
+            // TODO: exception handling in controllers
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void unsubscribe(int subscriptionId) {
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(unsubscribeQuery);
+            pstmt.setInt(1, subscriptionId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             // TODO: exception handling in controllers
             throw new RuntimeException(e);
