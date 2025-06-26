@@ -786,19 +786,22 @@ async function handleSearchSubmit() {
 }
 
 // Function to add new category input row to search container
-function addCategoryInputRow() {
+function addCategoryInputRow(afterRow = null) {
     const newRow = document.createElement('div');
     newRow.classList.add('search-input-row', 'category-row');
     newRow.innerHTML = `<input type="text" class="search-input-outline search-category-input" placeholder="Category">`;
-    
-    // Insert after the simple search form
-    const simpleForm = document.getElementById('simple-search-form');
-    simpleForm.parentNode.insertBefore(newRow, simpleForm.nextSibling);
-    
-    // Add event listener to the new input
+
+    if (afterRow) {
+        afterRow.after(newRow);
+    } else {
+        const simpleForm = document.getElementById('simple-search-form');
+        simpleForm.parentNode.insertBefore(newRow, simpleForm.nextSibling);
+    }
+
     const newInput = newRow.querySelector('input');
     setupCategoryInputEvents(newInput);
 }
+
 
 // Function to add new tag+description row
 function addTagRow() {
@@ -824,7 +827,7 @@ function setupCategoryInputEvents(input) {
         const hasEmptyInput = Array.from(allCategoryInputs).some(inp => inp.value.trim() === '');
         
         if (!hasEmptyInput && this.value.trim() !== '') {
-            addCategoryInputRow();
+            addCategoryInputRow(this.closest('.search-input-row.category-row'));
         }
     });
     
