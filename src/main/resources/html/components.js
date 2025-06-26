@@ -142,6 +142,7 @@ function clearAllFields() {
     document.querySelector(".simple-search-text").value = "";
     document.getElementById('search-bbox-input').value = "";
     document.getElementById('search-after-input').value = "";
+    document.getElementById('search-email-input').value = "";
     
     // Clear category inputs appended to search container
     const categoryRows = searchContainer.querySelectorAll('.search-input-row.category-row');
@@ -1076,21 +1077,35 @@ async function subscribe() {
     // params.append("tz_offset", tz_offset)
     
     const email = document.getElementById('search-email-input').value.trim();
-    const requestBody = { email: email, tz_offset: tz_offset};
-    try {
-        if (params.toString() !== '') {
-            const response = await fetch(`/subscribe?${params.toString()}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestBody)
-            });
-        }   
-        
-    } catch(err) {
-        console.error("Error searching:", err);
+    const validateEmail = (email) => {
+        return String(email)
+            .toLowerCase()
+            .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            );
+        };
+    if (validateEmail(email)) {
+        document.getElementById('error-msg').style.display = 'none';
+        const requestBody = { email: email, tz_offset: tz_offset};
+        try {
+            if (params.toString() !== '') {
+                const response = await fetch(`/subscribe?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+            }   
+            
+        } catch(err) {
+            console.error("Error searching:", err);
+        }
+    } else {
+        document.getElementById('error-msg').style.display = 'block';
+
     }
+    
 }
 
 document.addEventListener('DOMContentLoaded', initializeDynamicInputs);

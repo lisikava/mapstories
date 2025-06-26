@@ -13,7 +13,7 @@ import java.util.Map;
 public class SubscriptionController {
     public void registerRoutes(Javalin app) {
         app.post("/subscribe", this::subscribe);
-        app.delete("/unsubscribe/{id}", this::unsubscribe);
+        app.get("/unsubscribe/{id}", this::unsubscribe);
     }
 
     private void subscribe(Context ctx) {
