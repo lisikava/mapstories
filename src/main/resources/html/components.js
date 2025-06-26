@@ -918,56 +918,7 @@ function displayPins(pins) {
 
 
 async function advancedSearch() {
-    const params = new URLSearchParams();
-    const categories = [];
-    const after = document.getElementById('search-after-input').value;
-    var bbox = document.getElementById('search-bbox-input').value.trim();
-    
-    // Get categories from main search input and additional category inputs
-    const mainSearchValue = document.querySelector('.simple-search-text').value.trim();
-    if (mainSearchValue !== '') {
-        categories.push(mainSearchValue);
-    }
-    
-    const categoryInputs = searchContainer.querySelectorAll('.search-category-input');
-    categoryInputs.forEach(input => {
-        const value = input.value.trim();
-        if (value !== '') {
-            categories.push(value);
-        }
-    });
-    
-    // Get tags from tag/description pairs
-    const tags = {};
-    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
-    
-    tagRows.forEach((row, index) => {
-        const tagInput = row.querySelector('.search-tag-input');
-        const descInput = row.querySelector('.search-description-input');
-        const tagValue = tagInput ? tagInput.value.trim() : '';
-        const descValue = descInput ? descInput.value.trim() : '';
-        
-        if (tagValue !== '' && descValue !== '') {
-            tags[tagValue] = descValue;
-        }
-    });
-    
-    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" && value.trim() !== ""));
-    
-    if (categories && categories.length > 0) {
-        params.append("categories", categories);
-    }
-    if (!bbox || bbox === "") {
-        bbox = getCurrentBounds();
-        // bbox = document.getElementById('default-bbox-input').value.trim();
-    }
-    if (bbox) params.append("bbox", bbox);
-    if (after) params.append("after", after);
-    if (filteredTags && Object.keys(filteredTags).length > 0) {
-        for (const [key, value] of Object.entries(filteredTags)) {
-            params.append(`tags[${key}]`, value);
-        }
-    }
+    const params = getSearchParameters();
     try {
         if (params.toString() === '')
             loadPins();
@@ -1065,6 +1016,79 @@ function initializeDynamicInputs() {
         });
     }
 }
+function getSearchParameters() {
+    const params = new URLSearchParams();
+    const categories = [];
+    const after = document.getElementById('search-after-input').value;
+    var bbox = document.getElementById('search-bbox-input').value.trim();
+    
+    const mainSearchValue = document.querySelector('.simple-search-text').value.trim();
+    if (mainSearchValue !== '') {
+        categories.push(mainSearchValue);
+    }
+    
+    const categoryInputs = searchContainer.querySelectorAll('.search-category-input');
+    categoryInputs.forEach(input => {
+        const value = input.value.trim();
+        if (value !== '') {
+            categories.push(value);
+        }
+    });
+    
+    const tags = {};
+    const tagRows = tagsContainer.querySelectorAll('.search-input-row');
+    
+    tagRows.forEach((row, index) => {
+        const tagInput = row.querySelector('.search-tag-input');
+        const descInput = row.querySelector('.search-description-input');
+        const tagValue = tagInput ? tagInput.value.trim() : '';
+        const descValue = descInput ? descInput.value.trim() : '';
+        
+        if (tagValue !== '' && descValue !== '') {
+            tags[tagValue] = descValue;
+        }
+    });
+    
+    const filteredTags = Object.fromEntries(Object.entries(tags).filter(([key, value]) => key.trim() !== "" && value.trim() !== ""));
+    
+    if (categories && categories.length > 0) {
+        params.append("categories", categories);
+    }
+    if (!bbox || bbox === "") {
+        bbox = getCurrentBounds();
+        // bbox = document.getElementById('default-bbox-input').value.trim();
+    }
+    if (bbox) params.append("bbox", bbox);
+    if (after) params.append("after", after);
+    if (filteredTags && Object.keys(filteredTags).length > 0) {
+        for (const [key, value] of Object.entries(filteredTags)) {
+            params.append(`tags[${key}]`, value);
+        }
+    }
+    return params;
+}
+async function subscribe() {
+    var params = getSearchParameters();
+    var tz_offset = new Date().getTimezoneOffset();
+    // params.append("tz_offset", tz_offset)
+    
+    const email = document.getElementById('search-email-input').value.trim();
+    const requestBody = { email: email, tz_offset: tz_offset};
+    try {
+        if (params.toString() !== '') {
+            const response = await fetch(`/subscribe?${params.toString()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+        }   
+        
+    } catch(err) {
+        console.error("Error searching:", err);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', initializeDynamicInputs);
 
@@ -1076,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.querySelector(".simple-search-svg").addEventListener("click", () => { advancedSearch() }); // Listener for the Simple Search button (Magnifier Icon)
-document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
+document.querySelector(".email-button-outline").addEventListener("click", () =>{ subscribe() });     // Listener for the Email button that sends an email to the user
 
 const  followText = document.querySelector(".subscribe");  // Subscribe text button
 followText.addEventListener("click", () =>{
