@@ -143,8 +143,6 @@ function clearAllFields() {
     document.getElementById('search-bbox-input').value = "";
     document.getElementById('search-after-input').value = "";
     
-    document.querySelector(".simple-search-text").classList.remove('inactive');
-    
     // Clear category inputs appended to search container
     const categoryRows = searchContainer.querySelectorAll('.search-input-row.category-row');
     categoryRows.forEach(row => row.remove());
@@ -162,11 +160,9 @@ function clearTagsContainer() {
         const descInput = firstRow.querySelector('.search-description-input');
         if (tagInput) {
             tagInput.value = "";
-            tagInput.classList.remove('inactive');
         }
         if (descInput) {
             descInput.value = "";
-            descInput.classList.remove('inactive');
         }
         // Remove additional rows
         for (let i = 1; i < rows.length; i++) {
@@ -793,7 +789,7 @@ async function handleSearchSubmit() {
 function addCategoryInputRow() {
     const newRow = document.createElement('div');
     newRow.classList.add('search-input-row', 'category-row');
-    newRow.innerHTML = `<input type="text" class="search-input-outline search-category-input inactive" placeholder="Category">`;
+    newRow.innerHTML = `<input type="text" class="search-input-outline search-category-input" placeholder="Category">`;
     
     // Insert after the simple search form
     const simpleForm = document.getElementById('simple-search-form');
@@ -809,8 +805,8 @@ function addTagRow() {
     const newRow = document.createElement('div');
     newRow.classList.add('search-input-row');
     newRow.innerHTML = `
-        <input type="text" class="search-input-outline search-tag-input inactive" placeholder="Tag">
-        <input type="text" class="search-input-outline search-description-input inactive" placeholder="Description">
+        <input type="text" class="search-input-outline search-tag-input" placeholder="Tag">
+        <input type="text" class="search-input-outline search-description-input" placeholder="Description">
     `;
     tagsContainer.appendChild(newRow);
     
@@ -823,13 +819,6 @@ function addTagRow() {
 // Function to setup event listeners for category inputs
 function setupCategoryInputEvents(input) {
     input.addEventListener('input', function() {
-        // Remove inactive class when user starts typing
-        if (this.value.trim() !== '') {
-            this.classList.remove('inactive');
-        } else {
-            this.classList.add('inactive');
-        }
-        
         // Check if we need to add a new empty input
         const allCategoryInputs = searchContainer.querySelectorAll('.search-input-row.category-row .search-category-input');
         const hasEmptyInput = Array.from(allCategoryInputs).some(inp => inp.value.trim() === '');
@@ -844,8 +833,6 @@ function setupCategoryInputEvents(input) {
             const allCategoryInputs = searchContainer.querySelectorAll('.search-input-row.category-row .search-category-input');
             if (allCategoryInputs.length > 1) {
                 this.closest('.search-input-row').remove();
-            } else {
-                this.classList.add('inactive');
             }
         }
     });
@@ -861,12 +848,6 @@ function setupCategoryInputEvents(input) {
 
 function setupTagInputEvents(tagInput, descInput) {
     const handleInput = function() {
-        if (this.value.trim() !== '') {
-            this.classList.remove('inactive');
-        } else {
-            this.classList.add('inactive');
-        }
-        
         const currentRow = this.closest('.search-input-row');
         const tagVal = currentRow.querySelector('.search-tag-input').value.trim();
         const descVal = currentRow.querySelector('.search-description-input').value.trim();
@@ -1034,7 +1015,7 @@ function initializeDynamicInputs() {
     const tagInput = tagsContainer.querySelector('.search-tag-input');
     const descriptionInput = tagsContainer.querySelector('.search-description-input');
     
-    // The first Tag and Description inputs should be cream-colored (not inactive)
+    // Setup event listeners for the first Tag and Description inputs
     if (tagInput && descriptionInput) {
         setupTagInputEvents(tagInput, descriptionInput);
     }
