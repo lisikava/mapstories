@@ -31,6 +31,12 @@ public class SubscriptionManager {
             delete from subscriptions
             where id = ?""";
 
+    private static final String searchEndpoint =
+            "http://localhost:7070/pins/search";
+
+    private static final String unsubscribeEndpoint =
+            "http://localhost:7070/unsubscribe";
+
     private static final String welcomeEmail = """
             Hi avid Storyteller!
             
@@ -39,7 +45,7 @@ public class SubscriptionManager {
             Yours faithfully,
             John Mapstory - Java Mail Bot
             
-            Unsubscribe with http://localhost:7070/subscriptions/%d
+            Unsubscribe with %s/%d
             """;
 
     private static final String digestEmail = """
@@ -50,8 +56,8 @@ public class SubscriptionManager {
             Yours faithfully,
             John Mapstory - Java Mail Bot
             
-            View them at http://localhost:7070/search?pattern=%s
-            Unsubscribe with http://localhost:7070/subscriptions/%d
+            View them at %s?pattern=%s
+            Unsubscribe with %s/%d
             """;
 
     private SubscriptionManager() {}
@@ -126,7 +132,9 @@ public class SubscriptionManager {
                                  "Your Mapstories digest",
                                  String.format(digestEmail,
                                                updates,
+                                               searchEndpoint,
                                                pattern,
+                                               unsubscribeEndpoint,
                                                subscriptionId
                                  )
         );
@@ -135,7 +143,9 @@ public class SubscriptionManager {
     private static void sendWelcome(String email, int subscriptionId) {
         EmailSender.composeEmail(email,
                                  "Welcome to Mapstories",
-                                 String.format(welcomeEmail, subscriptionId)
+                                 String.format(welcomeEmail,
+                                               unsubscribeEndpoint,
+                                               subscriptionId)
         );
     }
 

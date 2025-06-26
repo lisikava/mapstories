@@ -5,7 +5,7 @@ import io.javalin.http.Context;
 
 public class SubscriptionController {
     public void registerRoutes(Javalin app) {
-        app.delete("/subscriptions/{id}", this::deleteSubscription);
+        app.get("/unsubscribe/{id}", this::deleteSubscription);
     }
 
     private void deleteSubscription(Context ctx) {
