@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import org.postgresql.geometric.PGbox;
 import org.postgresql.geometric.PGpoint;
 
 import java.util.Arrays;
@@ -130,5 +129,4 @@ public class PinController {
         bbox = bbox.replaceAll("[\\s,]+", ",");
         return bbox;
     }
-
 }

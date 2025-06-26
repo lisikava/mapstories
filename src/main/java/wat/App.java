@@ -8,8 +8,11 @@ public class App {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/html", Location.CLASSPATH);
         });
+        // LostAndFoundManager lostAndFoundManager = new LostAndFoundManager();
         PinController pc = new PinController();
         pc.registerRoutes(app);
+        SubscriptionController sc = new SubscriptionController();
+        sc.registerRoutes(app);
         app.start(7070);
     }
 }

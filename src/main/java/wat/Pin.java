@@ -7,10 +7,8 @@ import org.postgresql.util.PGobject;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class Pin {
 
@@ -87,6 +85,18 @@ public class Pin {
             where
                 id = ?""";
 
+    private static final Set<Consumer<Pin>> postPersistenceHooks =
+            new HashSet<>();
+
+    private static void executePostPersistenceHooks(Pin pin) {
+        for (var hook : postPersistenceHooks)
+            hook.accept(pin);
+    }
+
+    public static void registerPostPersistenceHook(Consumer<Pin> hook) {
+        postPersistenceHooks.add(hook);
+    }
+
     public static Pin create(final PGpoint location,
                              final String category,
                              final Map<String, String> tags
@@ -113,7 +123,10 @@ public class Pin {
             // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
-        return new Pin(id, location, category, tags, createTime, updateTime);
+        Pin retVal =
+                new Pin(id, location, category, tags, createTime, updateTime);
+        executePostPersistenceHooks(retVal);
+        return retVal;
     }
 
     public static List<Pin> retrieve(String pattern) {
@@ -169,7 +182,10 @@ public class Pin {
             // TODO: exception handling in controllers
             throw new RuntimeException(e);
         }
-        return new Pin(id, location, category, tags, createTime, updateTime);
+        Pin retVal =
+                new Pin(id, location, category, tags, createTime, updateTime);
+        executePostPersistenceHooks(retVal);
+        return retVal;
     }
 
     public static void delete(Integer id) {

@@ -1,5 +1,7 @@
 package wat;
 
+import org.postgresql.util.PGobject;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.*;
@@ -21,9 +23,19 @@ public class SubscriptionManager {
             insert into subscriptions(email, pattern, tz_offset)
             values(?, ?, ?)
             returning id""";
-    // TODO: query that outputs pin counts for each user
-    private static final String updateSubscriptionsQuery = """
+    // TODO: query that outputs count of newly updated pins for each user
+    private static final String digestUpdateQuery = """
             """;
+
+    private static final String unsubscribeQuery = """
+            delete from subscriptions
+            where id = ?""";
+
+    private static final String searchEndpoint =
+            "http://localhost:7070/pins/search";
+
+    private static final String unsubscribeEndpoint =
+            "http://localhost:7070/unsubscribe";
 
     private static final String welcomeEmail = """
             Hi avid Storyteller!
@@ -33,7 +45,7 @@ public class SubscriptionManager {
             Yours faithfully,
             John Mapstory - Java Mail Bot
             
-            Unsubscribe with http://localhost:7070/subscriptions/%d
+            Unsubscribe with %s/%d
             """;
 
     private static final String digestEmail = """
@@ -44,8 +56,8 @@ public class SubscriptionManager {
             Yours faithfully,
             John Mapstory - Java Mail Bot
             
-            View them at http://localhost:7070/search?pattern=%s
-            Unsubscribe with http://localhost:7070/subscriptions/%d
+            View them at %s?pattern=%s
+            Unsubscribe with %s/%d
             """;
 
     private SubscriptionManager() {}
@@ -87,24 +99,21 @@ public class SubscriptionManager {
 
     /**
      * Update subscriptions.
-     * TODO: enable local updates with arbitrary period
+     * TODO: in perspective, enable local updates with arbitrary period
      *
      * @param period period in minutes
      */
     private static void updateSubscriptions(int period) {
-        LocalTime thisMoment = LocalTime.now();
         try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement pstmt =
-                    conn.prepareStatement(updateSubscriptionsQuery);
-            conn.prepareStatement(updateSubscriptionsQuery);
-//            LocalTime currentTime =
-//                    LocalTime.of(thisMoment.getHour(), thisMoment.getMinute());
+            PreparedStatement pstmt = conn.prepareStatement(digestUpdateQuery);
+            conn.prepareStatement(digestUpdateQuery);
             pstmt.setInt(1, period);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
                 int updates = rs.getInt("updates");
-                if (updates == 0) continue;
+                if (updates == 0) // nothing to inform of
+                    continue;
+                int id = rs.getInt("id");
                 String email = rs.getString("email");
                 String pattern = rs.getString("pattern");
                 sendDigest(email, id, pattern, updates);
@@ -123,7 +132,9 @@ public class SubscriptionManager {
                                  "Your Mapstories digest",
                                  String.format(digestEmail,
                                                updates,
+                                               searchEndpoint,
                                                pattern,
+                                               unsubscribeEndpoint,
                                                subscriptionId
                                  )
         );
@@ -132,7 +143,9 @@ public class SubscriptionManager {
     private static void sendWelcome(String email, int subscriptionId) {
         EmailSender.composeEmail(email,
                                  "Welcome to Mapstories",
-                                 String.format(welcomeEmail, subscriptionId)
+                                 String.format(welcomeEmail,
+                                               unsubscribeEndpoint,
+                                               subscriptionId)
         );
     }
 
@@ -143,12 +156,26 @@ public class SubscriptionManager {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(subscribeQuery);
             pstmt.setString(1, email);
-            pstmt.setString(2, pattern);
+            PGobject jsonbObj = new PGobject();
+            jsonbObj.setType("jsonb");
+            jsonbObj.setValue(pattern);
+            pstmt.setObject(2, jsonbObj);
             pstmt.setInt(3, timezoneOffset);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
-            int id = rs.getInt(1); // TODO: welcome email
+            int id = rs.getInt(1);
             sendWelcome(email, id);
+        } catch (SQLException e) {
+            // TODO: exception handling in controllers
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void unsubscribe(int subscriptionId) {
+        try (Connection conn = dataSource.getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(unsubscribeQuery);
+            pstmt.setInt(1, subscriptionId);
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             // TODO: exception handling in controllers
             throw new RuntimeException(e);

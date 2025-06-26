@@ -16,6 +16,9 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Utility class for determining whether two strings match.
+ */
 public class LostAndFoundMatcher {
 
     private static final HttpClient client = HttpClient.newBuilder()
@@ -55,9 +58,10 @@ public class LostAndFoundMatcher {
         Properties properties = new Properties();
         try (InputStream stream = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("gemini.properties"); InputStream secretsStream = Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream("gemini-secrets.properties")) {
+                .getResourceAsStream("gemini.properties");
+             InputStream secretsStream = Thread.currentThread()
+                     .getContextClassLoader()
+                     .getResourceAsStream("gemini-secrets.properties")) {
             properties.load(stream);
             properties.load(secretsStream);
         } catch (IOException e) {
@@ -99,8 +103,10 @@ public class LostAndFoundMatcher {
         }
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(properties.getProperty("api_url") + "?key=" + properties.getProperty(
-                        "api_key")))
+                .uri(URI.create(
+                        properties.getProperty("api_url") +
+                                "?key=" +
+                                properties.getProperty("api_key")))
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofSeconds(30))
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
@@ -153,4 +159,6 @@ public class LostAndFoundMatcher {
                 ((double) intersectingWords / lostWordsCount + (double) intersectingWords / foundWordsCount) / 2;
         return simpleScore >= 0.6;
     }
+
+    private LostAndFoundMatcher() {}
 } 
