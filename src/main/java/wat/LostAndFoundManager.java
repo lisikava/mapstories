@@ -72,7 +72,7 @@ public class LostAndFoundManager {
             "http://localhost:7070/pins";
 
     private static final String rejectMatchEndpoint =
-            "http://localhost:7070/rejectmatch";
+            "http://localhost:7070/rejectMatch";
 
     private static final String matchingPairEmail = """
             Hi avid Storyteller!
@@ -220,9 +220,9 @@ public class LostAndFoundManager {
                 "Potential match for the item you found",
                 String.format(matchingPairEmail,
                               viewPinEndpoint,
-                              foundId,
+                              lostId,
                               rejectMatchEndpoint,
-                              lostId));
+                              foundId));
     }
 
     // TODO: parameters according to the relational model
