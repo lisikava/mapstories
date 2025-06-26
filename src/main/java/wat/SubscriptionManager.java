@@ -1,5 +1,7 @@
 package wat;
 
+import org.postgresql.util.PGobject;
+
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.*;
@@ -144,7 +146,10 @@ public class SubscriptionManager {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(subscribeQuery);
             pstmt.setString(1, email);
-            pstmt.setString(2, pattern);
+            PGobject jsonbObj = new PGobject();
+            jsonbObj.setType("jsonb");
+            jsonbObj.setValue(pattern);
+            pstmt.setObject(2, jsonbObj);
             pstmt.setInt(3, timezoneOffset);
             ResultSet rs = pstmt.executeQuery();
             rs.next();
