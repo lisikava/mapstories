@@ -139,11 +139,11 @@ function clearTagsContainer() {
         const descInput = firstRow.querySelector('.search-description-input');
         if (tagInput) {
             tagInput.value = "";
-            tagInput.classList.add('inactive');
+            tagInput.classList.remove('inactive');
         }
         if (descInput) {
             descInput.value = "";
-            descInput.classList.add('inactive');
+            descInput.classList.remove('inactive');
         }
         // Remove additional rows
         for (let i = 1; i < rows.length; i++) {
@@ -691,9 +691,6 @@ function setupTagInputEvents(tagInput, descInput) {
             
             if (!isFirstRow) {
                 currentRow.remove();
-            } else {
-                currentRow.querySelector('.search-tag-input').classList.add('inactive');
-                currentRow.querySelector('.search-description-input').classList.add('inactive');
             }
         }
     };

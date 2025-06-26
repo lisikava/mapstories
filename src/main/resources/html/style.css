@@ -8,6 +8,8 @@
     --color-blue: #009FB7;
     --color-black: #272727;
     --color-lgray: rgba(77, 96, 128, 0.8);
+    --color-grey-headers: #858585;
+    --color-creme-light: rgb(243, 223, 211);
 }
 
 body {
@@ -102,9 +104,9 @@ body {
     outline: none;
     width: 12.5vw;
     padding: 0.4vw 0.8vw;
-    border-radius: 0.6vw;
-    background-color: rgb(243, 223, 211);
-    height: 5vh;
+    border-radius: 8px;
+    background-color: var(--color-creme-light);
+    height: 37px;
     box-sizing: border-box;
 }
 
@@ -247,7 +249,6 @@ svg.simple-search-svg {
     font-size: 70px;
     text-align: center;
     color: var(--gold-color);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 #pins-description-container {
@@ -286,7 +287,8 @@ svg.simple-search-svg {
     padding: 8px;
     border-radius: 8px;
     margin-bottom: 10px;
-    border: 1px solid #8d4747;
+    border: none;
+    background-color: var(--color-creme-light);
     box-sizing: border-box;
 }
 
@@ -407,7 +409,7 @@ svg.simple-search-svg {
     width: 10vw;
     border: none;
     border-radius: 8px;
-    background-color: rgb(243, 223, 211);
+    background-color: var(--color-creme-light);
     font-size: 14px;
     outline: none;
     color: var(--color-grey);
@@ -441,7 +443,7 @@ svg.simple-search-svg {
     font-size: 1.2vw;
     padding: 0.4vw 0.8vw;
     border-radius: 0.6vw;
-    background-color: rgb(243, 223, 211);
+    background-color: var(--color-creme-light);
     color: var(--color-grey);
     box-sizing: border-box;
 }
@@ -457,7 +459,7 @@ svg.simple-search-svg {
 }
 
 #search-container .search-input-row .search-category-input.inactive::placeholder {
-    color: #cfcbcb;
+    color: var(--color-grey-headers);
 }
 
 #search-container .search-input-row.category-row {
