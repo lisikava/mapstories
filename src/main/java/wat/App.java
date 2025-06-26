@@ -11,6 +11,8 @@ public class App {
         // LostAndFoundManager lostAndFoundManager = new LostAndFoundManager();
         PinController pc = new PinController();
         pc.registerRoutes(app);
+        SubscriptionController sc = new SubscriptionController();
+        sc.registerRoutes(app);
         app.start(7070);
     }
 }
