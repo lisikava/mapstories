@@ -21,6 +21,7 @@ public class PinController {
         app.put("/pins/{id}", this::updatePin);
         app.get("/pins/search", this::search);
         app.get("/pins/advanced-search", this::advancedSearch);
+        app.delete("/subscriptions/{id}", this::deleteSubscription);
     }
 
     private void getAllPins(Context ctx) {
@@ -129,6 +130,11 @@ public class PinController {
         bbox = bbox.trim();
         bbox = bbox.replaceAll("[\\s,]+", ",");
         return bbox;
+    }
+
+    private void deleteSubscription(Context ctx) {
+        int id = Integer.parseInt(ctx.pathParam("id"));
+        SubscriptionManager.unsubscribe(id);
     }
 
 }
