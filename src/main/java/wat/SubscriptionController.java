@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class SubscriptionController {
     public void registerRoutes(Javalin app) {
-        app.get("/subscribe", this::subscribe);
+        app.post("/subscribe", this::subscribe);
         app.get("/unsubscribe/{id}", this::unsubscribe);
     }
 
