@@ -14,6 +14,12 @@ create table if not exists subscriptions (
     pattern jsonb not null check (pattern is json object)
 );
 
+create table lost_and_found_matches (
+    lost bigint references pins,
+    found bigint references pins,
+    primary key (lost, found)
+);
+
 create index if not exists pins_location_gist on pins using gist(location);
 create index if not exists pins_category_idx on pins(category);
 create index if not exists pins_tags_gin on pins using gin(tags);
