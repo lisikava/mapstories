@@ -3,6 +3,16 @@ tileLayerURL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
 window.onload = async function () {
     clearAllFields();
     await loadPins();
+    await loadCategories();
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('/categories.json');
+        categoriesData = await response.json();
+    } catch (error) {
+        console.error('Failed to load categories:', error);
+    }
 }
 
 var map = L.map('map', {
@@ -81,6 +91,18 @@ style.textContent = `
         border: 2px solid #ff4444;
         background-color: rgba(255, 0, 0, 0.05);
     }
+    .search-input-outline.typing {
+        border: 2px solid #ff4444 !important;
+    }
+    .simple-search-text.typing {
+        border: 2px solid #ff4444 !important;
+    }
+    .tag-input.typing {
+        border: 2px solid #ff4444 !important;
+    }
+    .description-input.typing {
+        border: 2px solid #ff4444 !important;
+    }
 `;
 document.head.appendChild(style);
 
@@ -102,6 +124,7 @@ let editFormOpen = false;
 let searchFormOpen = false;
 const allDescriptions = [];
 const placedPins = [];
+let categoriesData = {};
 
 function removeListeners() {
     addCellButton.removeEventListener('click', addDescriptionHandler);
@@ -150,6 +173,152 @@ function clearTagsContainer() {
             rows[i].remove();
         }
     }
+}
+// Create recommended fields for category
+function createCategorySpecificFields(category) {
+    const existingElements = descriptionContainer.querySelectorAll('.category-specific-element');
+    existingElements.forEach(el => el.remove());
+    
+    const categoryKey = category.toLowerCase();
+    const categoryConfig = categoriesData[categoryKey];
+    
+    if (!categoryConfig) return;
+    
+    // Create is_vague category info box
+    if (categoryConfig.is_vague) {
+        const vagueCategoryBox = document.createElement('div');
+        vagueCategoryBox.classList.add('category-info-box', 'category-specific-element', 'vague-category-box');
+        vagueCategoryBox.innerHTML = `${category.charAt(0).toUpperCase() + category.slice(1)} is a general category, please provide more detailed category`;
+        vagueCategoryBox.style.cssText = `
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #333;
+            font-size: 14px;
+            width: 304px;
+            box-sizing: border-box;
+        `;
+        descriptionContainer.appendChild(vagueCategoryBox);
+    }
+    // Create expected content info box 
+    if (categoryConfig.expected && categoryConfig.expected.length > 0) {
+        const expectedBox = document.createElement('div');
+        expectedBox.classList.add('category-info-box', 'category-specific-element', 'expected-content-box');
+        expectedBox.innerHTML = `Expected content: ${categoryConfig.expected.join(', ')}`;
+        expectedBox.style.cssText = `
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #333;
+            font-size: 14px;
+            width: 304px;
+            box-sizing: border-box;
+        `;
+        descriptionContainer.appendChild(expectedBox);
+    }
+}
+
+function setupCategoryInputListener() {
+    const categoryInput = descriptionContainer.querySelector('.category-input-group .description-input');
+    if (categoryInput) {
+        categoryInput.addEventListener('input', function() {
+            const category = this.value.trim().toLowerCase();
+            if (category !== '') {
+                createCategorySpecificFields(category);
+                setupTagDescriptionListener(category);
+            } else {
+                const existingElements = descriptionContainer.querySelectorAll('.category-specific-element');
+                existingElements.forEach(el => el.remove());
+            }
+        });
+        
+        categoryInput.addEventListener('focus', function() {
+            this.classList.add('typing');
+        });
+        
+        categoryInput.addEventListener('blur', function() {
+            this.classList.remove('typing');
+        });
+    }
+}
+
+function setupTagDescriptionListener(category) {
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1 && node.classList && node.classList.contains('description-input-group')) {
+                        const tagInput = node.querySelector('.tag-input');
+                        const descInput = node.querySelector('.description-input');
+                        if (tagInput && descInput) {
+                            setupInputListener(tagInput, descInput, category);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    observer.observe(descriptionContainer, { childList: true, subtree: true });
+    
+    const existingInputGroups = descriptionContainer.querySelectorAll('.description-input-group');
+    existingInputGroups.forEach(group => {
+        const tagInput = group.querySelector('.tag-input');
+        const descInput = group.querySelector('.description-input');
+        if (tagInput && descInput && !tagInput.disabled) {
+            setupInputListener(tagInput, descInput, category);
+        }
+    });
+}
+
+function setupInputListener(tagInput, descInput, category) {
+    const checkForVagueCategory = () => {
+        const categoryKey = category.toLowerCase();
+        const categoryConfig = categoriesData[categoryKey];
+        
+        if (categoryConfig && categoryConfig.is_vague) {
+            const allInputGroups = descriptionContainer.querySelectorAll('.description-input-group');
+            let hasSpecificDetails = false;
+            
+            allInputGroups.forEach(group => {
+                const tag = group.querySelector('.tag-input');
+                const desc = group.querySelector('.description-input');
+                if (tag && desc && !tag.disabled && tag.value.trim() !== '' && desc.value.trim() !== '') {
+                    hasSpecificDetails = true;
+                }
+            });
+            
+             const vagueCategoryBox = descriptionContainer.querySelector('.vague-category-box');
+             if (hasSpecificDetails && vagueCategoryBox) {
+                 vagueCategoryBox.style.display = 'none';
+             } else if (!hasSpecificDetails && vagueCategoryBox) {
+                 vagueCategoryBox.style.display = 'block';
+             }
+        }
+    };
+    
+    tagInput.addEventListener('input', checkForVagueCategory);
+    descInput.addEventListener('input', checkForVagueCategory);
+    
+    tagInput.addEventListener('focus', function() {
+        this.classList.add('typing');
+    });
+    
+    tagInput.addEventListener('blur', function() {
+        this.classList.remove('typing');
+    });
+    
+    descInput.addEventListener('focus', function() {
+        this.classList.add('typing');
+    });
+    
+    descInput.addEventListener('blur', function() {
+        this.classList.remove('typing');
+    });
 }
 
 const addDescriptionHandler = function () {
@@ -436,6 +605,7 @@ function EditPin(pinIndex) {
         });
     }
     addListeners();
+    setupCategoryInputListener();
 }
 
 async function deletePin(pinIndex) {
@@ -508,6 +678,7 @@ map.on('click', function (e) {
         descriptionContainer.scrollTop = 0;
         currentPin = L.marker(e.latlng, { icon: pinIcon }).addTo(map);
         addListeners();
+        setupCategoryInputListener();
     } else if (!pinClicked && createFormOpen) {
         pinsDescriptionContainer.classList.add('hidden');
         
@@ -652,6 +823,14 @@ function setupCategoryInputEvents(input) {
             }
         }
     });
+    
+    input.addEventListener('focus', function() {
+        this.classList.add('typing');
+    });
+    
+    input.addEventListener('blur', function() {
+        this.classList.remove('typing');
+    });
 }
 
 function setupTagInputEvents(tagInput, descInput) {
@@ -695,10 +874,22 @@ function setupTagInputEvents(tagInput, descInput) {
         }
     };
     
+    const handleFocus = function() {
+        this.classList.add('typing');
+    };
+    
+    const handleBlurStyling = function() {
+        this.classList.remove('typing');
+    };
+    
     tagInput.addEventListener('input', handleInput);
     descInput.addEventListener('input', handleInput);
     tagInput.addEventListener('blur', handleBlur);
     descInput.addEventListener('blur', handleBlur);
+    tagInput.addEventListener('focus', handleFocus);
+    descInput.addEventListener('focus', handleFocus);
+    tagInput.addEventListener('blur', handleBlurStyling);
+    descInput.addEventListener('blur', handleBlurStyling);
 }
 
 function displayPins(pins) {
@@ -842,6 +1033,49 @@ function initializeDynamicInputs() {
                     }
                 });
             }
+        });
+        
+        mainSearchInput.addEventListener('focus', function() {
+            this.classList.add('typing');
+        });
+        
+        mainSearchInput.addEventListener('blur', function() {
+            this.classList.remove('typing');
+        });
+    }
+    
+    const bboxInput = document.getElementById('search-bbox-input');
+    const afterInput = document.getElementById('search-after-input');
+    
+    if (bboxInput) {
+        bboxInput.addEventListener('focus', function() {
+            this.classList.add('typing');
+        });
+        
+        bboxInput.addEventListener('blur', function() {
+            this.classList.remove('typing');
+        });
+    }
+    
+    if (afterInput) {
+        afterInput.addEventListener('focus', function() {
+            this.classList.add('typing');
+        });
+        
+        afterInput.addEventListener('blur', function() {
+            this.classList.remove('typing');
+        });
+    }
+    
+    const emailInput = document.querySelector('.search-input-outline[placeholder="Enter your email"]');
+    
+    if (emailInput) {
+        emailInput.addEventListener('focus', function() {
+            this.classList.add('typing');
+        });
+        
+        emailInput.addEventListener('blur', function() {
+            this.classList.remove('typing');
         });
     }
 }
