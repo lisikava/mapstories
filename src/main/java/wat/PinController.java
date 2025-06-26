@@ -18,8 +18,7 @@ public class PinController {
         app.post("/pins", this::createPin);
         app.delete("/pins/{id}", this::deletePin);
         app.put("/pins/{id}", this::updatePin);
-        app.get("/pins/search", this::search);
-        app.get("/pins/advanced-search", this::advancedSearch);
+        app.get("/pins/search", this::advancedSearch);
     }
 
     private void getAllPins(Context ctx) {
@@ -60,19 +59,6 @@ public class PinController {
         Pin.update(id, new PGpoint(lat, lon), category, tags);
     }
 
-    private void search(Context ctx) {
-        String category = ctx.queryParam("category");
-        String bbox = ctx.queryParam("bbox");
-        StringBuilder pattern = new StringBuilder("{");
-        pattern.append(String.format("\"categories\": [\"%s\"],", category));
-        if (bbox != null && !bbox.trim().isEmpty()) {
-            bbox = parseBbox(bbox);
-            pattern.append(String.format("\"bbox\": \"%s\"", bbox));
-        }
-//        String pattern = String.format("{\"categories\": [\"%s\"]}", category);
-        List<Pin> pins = Pin.retrieve(pattern.append("}").toString());
-        ctx.json(pins);
-    }
     private void advancedSearch(Context ctx) {
         String categories = ctx.queryParam("categories");
         String jsonCategories = null;
@@ -120,7 +106,6 @@ public class PinController {
         }
         if (pattern.charAt(pattern.length() - 1) == ',') pattern.deleteCharAt(pattern.length() - 1);
         pattern.append("}");
-//        System.out.println(pattern);
         List<Pin> pins = Pin.retrieve(pattern.toString());
         ctx.json(pins);
     }

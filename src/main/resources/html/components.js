@@ -916,28 +916,6 @@ function displayPins(pins) {
     return latlngs;
 }
 
-async function simpleSearch(category) {
-    try {
-        if (category === '')
-            loadPins();
-        const params = new URLSearchParams();
-        params.append("category", category);
-        // var bounds = map.getBounds();
-        var bbox = getCurrentBounds();
-        params.append("bbox", bbox);
-        const response = await fetch(`/pins/search?${params.toString()}`);
-        const pins = await response.json();
-        placedPins.forEach(info => map.removeLayer(info.pin));
-        placedPins.length = 0;
-        if (pins && pins.length > 0) {
-            var latlngs = displayPins(pins); 
-            var bounds = new L.LatLngBounds(latlngs);
-            map.fitBounds(bounds);
-        }
-    } catch(err) {
-        console.error("Error searching:", err);
-    }
-}
 
 async function advancedSearch() {
     const params = new URLSearchParams();
@@ -980,7 +958,8 @@ async function advancedSearch() {
         params.append("categories", categories);
     }
     if (!bbox || bbox === "") {
-        bbox = document.getElementById('default-bbox-input').value.trim();
+        bbox = getCurrentBounds();
+        // bbox = document.getElementById('default-bbox-input').value.trim();
     }
     if (bbox) params.append("bbox", bbox);
     if (after) params.append("after", after);
@@ -992,7 +971,7 @@ async function advancedSearch() {
     try {
         if (params.toString() === '')
             loadPins();
-        const response = await fetch(`/pins/advanced-search?${params.toString()}`);
+        const response = await fetch(`/pins/search?${params.toString()}`);
         const pins = await response.json();
         placedPins.forEach(info => map.removeLayer(info.pin));
         placedPins.length = 0;
@@ -1096,7 +1075,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-document.querySelector(".simple-search-svg").addEventListener("click", () => { simpleSearch(document.querySelector(".simple-search-text").value.trim()) }); // Listener for the Simple Search button (Magnifier Icon)
+document.querySelector(".simple-search-svg").addEventListener("click", () => { advancedSearch() }); // Listener for the Simple Search button (Magnifier Icon)
 document.querySelector(".email-button-outline").addEventListener("click", () =>{console.log("Email sent")});     // Listener for the Email button that sends an email to the user
 
 const  followText = document.querySelector(".subscribe");  // Subscribe text button
