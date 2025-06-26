@@ -184,6 +184,9 @@ function createCategorySpecificFields(category) {
     
     if (!categoryConfig) return;
     
+    const firstInputGroup = descriptionContainer.querySelector('.description-input-group');
+    if (!firstInputGroup) return;
+    
     // Create is_vague category info box
     if (categoryConfig.is_vague) {
         const vagueCategoryBox = document.createElement('div');
@@ -200,7 +203,7 @@ function createCategorySpecificFields(category) {
             width: 304px;
             box-sizing: border-box;
         `;
-        descriptionContainer.appendChild(vagueCategoryBox);
+        firstInputGroup.insertAdjacentElement('afterend', vagueCategoryBox);
     }
     // Create expected content info box 
     if (categoryConfig.expected && categoryConfig.expected.length > 0) {
@@ -218,7 +221,8 @@ function createCategorySpecificFields(category) {
             width: 304px;
             box-sizing: border-box;
         `;
-        descriptionContainer.appendChild(expectedBox);
+        const insertAfter = descriptionContainer.querySelector('.vague-category-box') || firstInputGroup;
+        insertAfter.insertAdjacentElement('afterend', expectedBox);
     }
 }
 
@@ -228,8 +232,9 @@ function setupCategoryInputListener() {
         categoryInput.addEventListener('input', function() {
             const category = this.value.trim().toLowerCase();
             if (category !== '') {
-                createCategorySpecificFields(category);
-                setupTagDescriptionListener(category);
+                const mainCategory = category.split('.')[0];
+                createCategorySpecificFields(mainCategory);
+                setupTagDescriptionListener(mainCategory);
             } else {
                 const existingElements = descriptionContainer.querySelectorAll('.category-specific-element');
                 existingElements.forEach(el => el.remove());
@@ -593,16 +598,37 @@ function EditPin(pinIndex) {
     currentPin = pinInfo.pin;
 
     descriptionContainer.innerHTML = '';
+    
+    let category = '';
     if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
+        const categoryPair = tagsAndDescriptions.find(pair => pair.tag === "Category");
+        if (categoryPair) {
+            const fullCategory = categoryPair.description.toLowerCase();
+            category = fullCategory.split('.')[0];
+            console.log('Found full category:', fullCategory);
+            console.log('Main category for lookup:', category);
+        }
+    }
+    
+    if (tagsAndDescriptions && tagsAndDescriptions.length > 0) {
+        // Create the input fields
         tagsAndDescriptions.forEach(pair => {
             const descriptionDiv = document.createElement('div');
             descriptionDiv.classList.add('description-input-group');
+            if (pair.tag === "Category") {
+                descriptionDiv.classList.add('category-input-group');
+            }
             descriptionDiv.innerHTML = `
                 <input type="text" class="tag-input" value="${pair.tag}" ${pair.tag === "Category" ? "disabled" : ""}>
                 <input type="text" class="description-input" value="${pair.description}">
             `;
             descriptionContainer.appendChild(descriptionDiv);
         });
+    }
+    
+    if (category !== '') {
+        createCategorySpecificFields(category);
+        setupTagDescriptionListener(category);
     }
     addListeners();
     setupCategoryInputListener();
