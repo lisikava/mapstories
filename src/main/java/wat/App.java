@@ -9,11 +9,14 @@ public class App {
             config.staticFiles.add("/html", Location.CLASSPATH);
         });
         SubscriptionManager.scheduleAtLocal(12, 15, 1);
-        // LostAndFoundManager lostAndFoundManager = new LostAndFoundManager();
+        LostAndFoundManager lostAndFoundManager = new LostAndFoundManager();
+        Pin.registerPostPersistenceHook(lostAndFoundManager::matchIfLostOrFound);
         PinController pc = new PinController();
         pc.registerRoutes(app);
         SubscriptionController sc = new SubscriptionController();
         sc.registerRoutes(app);
+        LostAndFoundController lostAndFoundController = new LostAndFoundController();
+        lostAndFoundController.registerRoutes(app);
         app.start(7070);
     }
 }

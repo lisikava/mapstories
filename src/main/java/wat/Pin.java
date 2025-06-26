@@ -89,6 +89,7 @@ public class Pin {
             new HashSet<>();
 
     private static void executePostPersistenceHooks(Pin pin) {
+        System.out.println("POST PERSISTENCE HOOKS EXECUTING");
         for (var hook : postPersistenceHooks)
             hook.accept(pin);
     }
