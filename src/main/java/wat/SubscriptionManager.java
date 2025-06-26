@@ -25,7 +25,66 @@ public class SubscriptionManager {
             returning id""";
     // TODO: query that outputs count of newly updated pins for each user
     private static final String digestUpdateQuery = """
-            """;
+            with period as (select ? * interval '1 minute' as period),
+            augmented_patterns as (
+                select
+                    id as sub_id,
+                    pattern || jsonb_build_object('after', now() - period) as pattern
+                from subscriptions, period
+            ),
+            search_params as (
+                select
+                    sub_id,
+                    (pattern->>'bbox')::box as bbox,
+                    pattern->'categories' as categories,
+                    pattern->'tags' as tags,
+                    (pattern->>'after')::timestamp as after
+                from augmented_patterns
+            ),
+            results as (
+                select
+                    pins.id as pin_id,
+                    search_params.sub_id
+                from pins, search_params
+                where
+                    (
+                        search_params.bbox is null or
+                        search_params.bbox @> pins.location
+                    ) and (
+                        search_params.categories is null or
+                        jsonb_typeof(search_params.categories) = 'null' or
+                        exists (
+                            select 1
+                            from jsonb_array_elements_text(search_params.categories) super
+                            where is_subcategory_of(pins.category, super)
+                        )
+                    ) and (
+                        search_params.tags is null or
+                        jsonb_typeof(search_params.tags) = 'null' or
+                        not exists (
+                            select 1
+                            from jsonb_each_text(search_params.tags) as tag
+                            where not (
+                                exist(pins.tags, tag.key) and (
+                                    tag.value is null or
+                                    pins.tags->tag.key = tag.value
+                                )
+                            )
+                        )
+                    ) and (
+                        after is null or
+                        update_time > after
+                    )
+            )
+            select
+                subscriptions.id,
+                subscriptions.email,
+                augmented_patterns.pattern,
+                count(results.pin_id) as change_count
+            from results
+                join augmented_patterns on results.sub_id = augmented_patterns.sub_id
+                join subscriptions on augmented_patterns.sub_id = subscriptions.id
+            group by subscriptions.id, augmented_patterns.pattern;""";
 
     private static final String unsubscribeQuery = """
             delete from subscriptions
@@ -106,11 +165,10 @@ public class SubscriptionManager {
     private static void updateSubscriptions(int period) {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(digestUpdateQuery);
-            conn.prepareStatement(digestUpdateQuery);
             pstmt.setInt(1, period);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                int updates = rs.getInt("updates");
+                int updates = rs.getInt("change_count");
                 if (updates == 0) // nothing to inform of
                     continue;
                 int id = rs.getInt("id");

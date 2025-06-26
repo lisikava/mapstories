@@ -8,6 +8,7 @@ public class App {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/html", Location.CLASSPATH);
         });
+        SubscriptionManager.scheduleAtLocal(12, 15, 1);
         // LostAndFoundManager lostAndFoundManager = new LostAndFoundManager();
         PinController pc = new PinController();
         pc.registerRoutes(app);
