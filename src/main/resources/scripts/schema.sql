@@ -14,7 +14,7 @@ create table if not exists subscriptions (
     pattern jsonb not null check (pattern is json object)
 );
 
-create table lost_and_found_matches (
+create table if not exists lost_and_found_matches (
     lost bigint references pins,
     found bigint references pins,
     primary key (lost, found)
