@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SubscriptionController {
+
+    private record EmailRequest(String email, Integer tz_offset) {}
+
     public void registerRoutes(Javalin app) {
         app.post("/subscribe", this::subscribe);
         app.get("/unsubscribe/{id}", this::unsubscribe);
@@ -36,7 +39,11 @@ public class SubscriptionController {
         for (String key : rawTags.keySet()) {
             if (key.startsWith("tags[")) {
                 String tagKey = key.substring(5, key.length() - 1);
-                tags.put(tagKey, ctx.queryParam(key).isEmpty() ? null : ctx.queryParam(key));
+                tags.put(tagKey,
+                         ctx.queryParam(key).isEmpty() ?
+                         null :
+                         ctx.queryParam(key)
+                );
 
             }
         }
@@ -60,13 +67,15 @@ public class SubscriptionController {
         if (after != null && !after.trim().isEmpty())
             pattern.append(String.format("\"after\": \"%s\",", after));
         if (jsonCategories != null && !jsonCategories.isEmpty())
-            pattern.append(String.format("\"categories\": %s,", jsonCategories));
+            pattern.append(String.format("\"categories\": %s,",
+                                         jsonCategories
+            ));
         if (jsonTags != null && !jsonTags.trim().isEmpty()) {
             pattern.append(String.format("\"tags\": %s", jsonTags));
         }
-        if (pattern.charAt(pattern.length() - 1) == ',') pattern.deleteCharAt(pattern.length() - 1);
+        if (pattern.charAt(pattern.length() - 1) == ',')
+            pattern.deleteCharAt(pattern.length() - 1);
         pattern.append("}");
-//        String pattern = json.get("pattern").toString();
         int tz_offset = 120;
         SubscriptionManager.subscribe(email, pattern.toString(), tz_offset);
         ctx.status(201);
@@ -76,9 +85,4 @@ public class SubscriptionController {
         int id = Integer.parseInt(ctx.pathParam("id"));
         SubscriptionManager.unsubscribe(id);
     }
-}
-
-class EmailRequest {
-    public String email;
-    public Integer tz_offset;
 }
