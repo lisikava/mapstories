@@ -60,13 +60,17 @@ public class LostAndFoundMatcher {
         Properties properties = new Properties();
         try (InputStream stream = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("gemini.properties"); InputStream secretsStream = Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream("gemini-secrets.properties")) {
+                .getResourceAsStream("gemini.properties")) {
             properties.load(stream);
-            properties.load(secretsStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+        try(InputStream secretsStream = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("gemini-secrets.properties")) {
+            properties.load(secretsStream);
+        }catch (IOException ignored) {
+            // no secrets file implies fallback to simpleMatching
         }
         return properties;
     }
