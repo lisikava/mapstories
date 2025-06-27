@@ -23,6 +23,7 @@ password=your_password
 api_key=your_api_key
 ```
 API key is not necessary for the functioning of the application.
+
 4. To configure the local database, refer to `dbconfig.properties` in project resources. Either create the database with the properties described there, or modify the file to match the database you wish to use. In psql, do ```create extension hstore;```. Then, import the `schema.sql` file (and, optionally, `sample.sql` if you wish to populate the database with sample pins.) into the database.  
 5. Compile the server with:
 ```bash
