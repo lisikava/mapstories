@@ -5,9 +5,9 @@ mapstories
 
 Requisites 
 -----
-- `JDK 21+`, `Maven 3.6.0+`, `PostgreSQL 16+`
-- Source code
-- Gemini API key
+- `JDK 21+`
+- `Maven 3.6.0+`
+- `PostgreSQL 16+`
 
 Installation
 -----
