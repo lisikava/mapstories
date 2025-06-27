@@ -72,4 +72,6 @@ public class EmailSender {
                 .buildEmail();
         return mailer.sendMail(email);
     }
+
+    private EmailSender() {}
 }
