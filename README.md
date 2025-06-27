@@ -1,17 +1,23 @@
 mapstories
 ==========
 
-**MapStories** is an application for viewing and sharing information with geographical location. It allows users to add pins to the map that represent personal memories, reported incidents, community events, lost/found items, and much more.
+**MapStories** is an application for viewing and sharing information with geographical location. It allows users to add pins to the map that represent personal memories, reported incidents, community events, lost/found items, and much more. MapStories uses Gemini to find corresponding 'Lost' and 'Found' pins. You may use a Gemini API, alternatively, the system will use regular expressions to establish matches. Please note that the alternative matching method has worse accuracy. 
+
+Requisites 
+-----
+- `JDK 21+` and `Maven 3.6.0+`
+- Source code
+- Gemini API key
 
 Installation
 -----
-
-So far, the application is accessible to those that have `JDK 21+`(haven't tried less) and `Maven 3.6.0+` (reasonable) installed on their system.
-
-To compile the server, use:
+1. Extract the Source code
+2. Navigate to `src/main/resources` and create `gemini-secrets.properties` file, put `api_key=[put Gemini API Key here]`.
+3. To compile the server, use:
 ```bash
 mvn compile
 ```
+Note: there's no need to setup the database.
 
 Usage
 -----
