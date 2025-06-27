@@ -10,6 +10,9 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * Representation of the Pin in project backend. Encapsulates CRUD operations.
+ */
 public class Pin {
 
     private static final DataSource dataSource =
@@ -94,10 +97,24 @@ public class Pin {
             hook.accept(pin);
     }
 
+    /**
+     * Register the action to the executed upon successful persistence of the
+     * pin.
+     *
+     * @param hook action to be executed
+     */
     public static void registerPostPersistenceHook(Consumer<Pin> hook) {
         postPersistenceHooks.add(hook);
     }
 
+    /**
+     * Create a pin.
+     *
+     * @param location pin geographical location
+     * @param category pin category
+     * @param tags     pin tags
+     * @return pin representation
+     */
     public static Pin create(final PGpoint location,
                              final String category,
                              final Map<String, String> tags
@@ -130,6 +147,12 @@ public class Pin {
         return retVal;
     }
 
+    /**
+     * Retrieve pins matching the pattern.
+     *
+     * @param pattern pattern
+     * @return list of matched pins
+     */
     public static List<Pin> retrieve(String pattern) {
         List<Pin> foundPins = new ArrayList<>();
         try (Connection conn = dataSource.getConnection()) {
@@ -158,6 +181,15 @@ public class Pin {
         return foundPins;
     }
 
+    /**
+     * Update an existing pin.
+     *
+     * @param id       pin identifier
+     * @param location pin geographical location
+     * @param category pin category
+     * @param tags     pin tags
+     * @return updated pin representation
+     */
     public static Pin update(Integer id,
                              PGpoint location,
                              String category,
@@ -189,6 +221,11 @@ public class Pin {
         return retVal;
     }
 
+    /**
+     * Delete a pin.
+     *
+     * @param id pin identifier
+     */
     public static void delete(Integer id) {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(deleteQuery);

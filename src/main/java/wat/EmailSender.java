@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Utility class for sending emails from the server.
+ */
 public class EmailSender {
     private final static Mailer mailer = initializeMailer();
 

@@ -3,7 +3,17 @@ package wat;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 
+/**
+ * Application main class.
+ */
 public class App {
+    private App() {}
+
+    /**
+     * Starts the application.
+     *
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         Javalin app = Javalin.create(config -> {
             config.staticFiles.add("/html", Location.CLASSPATH);
@@ -15,7 +25,8 @@ public class App {
         pc.registerRoutes(app);
         SubscriptionController sc = new SubscriptionController();
         sc.registerRoutes(app);
-        LostAndFoundController lostAndFoundController = new LostAndFoundController();
+        LostAndFoundController lostAndFoundController =
+                new LostAndFoundController();
         lostAndFoundController.registerRoutes(app);
         app.start(7070);
     }

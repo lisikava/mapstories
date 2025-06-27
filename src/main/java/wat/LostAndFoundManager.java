@@ -2,12 +2,10 @@ package wat;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Singleton for properly persisting states of Lost and Found pins as well as
- * finding their matching counterparts.
+ * Manager for recording and transitioning the states of lost and found pins.
  */
 public class LostAndFoundManager {
     private static final DataSource ds = DataSourceProvider.getDataSource();
@@ -67,7 +65,6 @@ public class LostAndFoundManager {
             returning lost;
             """;
 
-    // TODO: actual backend logic
     private static final String viewPinEndpoint =
             "http://localhost:7070/pins";
 
@@ -97,12 +94,16 @@ public class LostAndFoundManager {
         return instance;
     }
 
+    /**
+     * Track pin in the lost and found lifecycle if applicable.
+     *
+     * @param pin potential lost/found pin
+     */
     public void matchIfLostOrFound(Pin pin) {
         System.out.println("MATCHING IF LOST OR FOUND");
         if (pin.getCategory().equals("lost") || pin.getCategory()
                 .equals("found")) {
             matchAgainstCounterparts(pin);
-//            CompletableFuture.runAsync(() -> {matchAgainstCounterparts(pin);});
         }
     }
 
@@ -225,18 +226,19 @@ public class LostAndFoundManager {
                               foundId));
     }
 
-    // TODO: parameters according to the relational model
+    /**
+     * Reject the match of two pins.
+     *
+     * @param foundId id of the found
+     */
     public void deleteMatchingPair(Integer foundId) {
-//        Integer lostId = null;
         try (Connection conn = ds.getConnection()) {
             PreparedStatement pstmt =
                     conn.prepareStatement(unregisterMatchQuery);
             pstmt.setInt(1, foundId);
             ResultSet rs = pstmt.executeQuery();
-//            lostId = rs.getInt(1);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-//        matchAgainstLost();
     }
 }

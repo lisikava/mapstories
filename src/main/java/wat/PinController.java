@@ -11,8 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Controller for the endpoints of pins.
+ */
 public class PinController {
+    /**
+     * Register routes in the Javalin application.
+     *
+     * @param app Javalin application
+     */
     public void registerRoutes(Javalin app) {
         app.get("/pins", this::getAllPins);
         app.post("/pins", this::createPin);

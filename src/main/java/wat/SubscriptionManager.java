@@ -15,15 +15,17 @@ import java.util.concurrent.TimeUnit;
 public class SubscriptionManager {
     private static final ScheduledExecutorService scheduler =
             Executors.newSingleThreadScheduledExecutor();
+
     private static boolean routineStarted = false;
 
     private static final DataSource dataSource =
             DataSourceProvider.getDataSource();
+
     private static final String subscribeQuery = """
             insert into subscriptions(email, pattern, tz_offset)
             values(?, ?, ?)
             returning id""";
-    // TODO: query that outputs count of newly updated pins for each user
+
     private static final String digestUpdateQuery = """
             with period as (select ? * interval '1 minute' as period),
             augmented_patterns as (
@@ -203,10 +205,19 @@ public class SubscriptionManager {
                                  "Welcome to Mapstories",
                                  String.format(welcomeEmail,
                                                unsubscribeEndpoint,
-                                               subscriptionId)
+                                               subscriptionId
+                                 )
         );
     }
 
+    /**
+     * Subscribe for the updates on the pins matching the pattern. The
+     * updates are sent in form of periodic emails.
+     *
+     * @param email email of the subscriber
+     * @param pattern pattern subscribed for
+     * @param timezoneOffset time zone offset of the subscriber in minutes
+     */
     public static void subscribe(String email,
                                  String pattern,
                                  Integer timezoneOffset
@@ -229,6 +240,10 @@ public class SubscriptionManager {
         }
     }
 
+    /**
+     * Unsubscribe from the updates on the pins matching the pattern.
+     * @param subscriptionId subscription identifier
+     */
     public static void unsubscribe(int subscriptionId) {
         try (Connection conn = dataSource.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(unsubscribeQuery);

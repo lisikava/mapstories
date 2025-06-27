@@ -15,9 +15,11 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
- * Utility class for determining whether two strings match.
+ * Utility class for determining whether two strings match. Uses an LLM with a
+ * less sophisticated fallback.
  */
 public class LostAndFoundMatcher {
 
@@ -58,10 +60,9 @@ public class LostAndFoundMatcher {
         Properties properties = new Properties();
         try (InputStream stream = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("gemini.properties");
-             InputStream secretsStream = Thread.currentThread()
-                     .getContextClassLoader()
-                     .getResourceAsStream("gemini-secrets.properties")) {
+                .getResourceAsStream("gemini.properties"); InputStream secretsStream = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("gemini-secrets.properties")) {
             properties.load(stream);
             properties.load(secretsStream);
         } catch (IOException e) {
@@ -70,6 +71,14 @@ public class LostAndFoundMatcher {
         return properties;
     }
 
+    /**
+     * Asynchronously determine whether descriptions could be referring to
+     * the same object.
+     *
+     * @param lost description of the lost item
+     * @param found description of the found item
+     * @return handle to the result of matching
+     */
     public static CompletableFuture<Boolean> descriptionsMatch(String lost,
                                                                String found
     ) {
@@ -103,8 +112,7 @@ public class LostAndFoundMatcher {
         }
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(
-                        properties.getProperty("api_url") +
+                .uri(URI.create(properties.getProperty("api_url") +
                                 "?key=" +
                                 properties.getProperty("api_key")))
                 .header("Content-Type", "application/json")
@@ -140,14 +148,12 @@ public class LostAndFoundMatcher {
 
     private static boolean simpleMatch(String lostDesc, String foundDesc) {
         String intoWordsRegex = "[\\p{Punct}\\s]+";
-        Set<String> lostWords =
-                new HashSet<>(Arrays.stream(lostDesc.split(intoWordsRegex))
-                                      .filter(str -> str.length() > 2)
-                                      .toList());
-        Set<String> foundWords =
-                new HashSet<>(Arrays.stream(foundDesc.split(intoWordsRegex))
-                                      .filter(str -> str.length() > 2)
-                                      .toList());
+        Set<String> lostWords = Arrays.stream(lostDesc.split(intoWordsRegex))
+                .filter(str -> str.length() > 2)
+                .collect(Collectors.toSet());
+        Set<String> foundWords = Arrays.stream(foundDesc.split(intoWordsRegex))
+                .filter(str -> str.length() > 2)
+                .collect(Collectors.toSet());
         int lostWordsCount = lostWords.size();
         int foundWordsCount = foundWords.size();
 

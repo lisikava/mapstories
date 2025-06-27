@@ -7,6 +7,10 @@ import java.io.InputStream;
 import java.util.Properties;
 import javax.sql.DataSource;
 
+/**
+ * Creates and provides the DataSource object for communication with the
+ * database.
+ */
 public class DataSourceProvider {
 
     private static HikariConfig config = loadHikariConfig();
