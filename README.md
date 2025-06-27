@@ -1,7 +1,7 @@
 mapstories
 ==========
 
-**MapStories** is an application for viewing and sharing information with geographical location. It allows users to add pins to the map that represent personal memories, reported incidents, community events, lost/found items, and much more. MapStories uses Gemini to find corresponding 'Lost' and 'Found' pins. You may use a Gemini API, alternatively, the system will use regular expressions to establish matches. Please note that the alternative matching method has worse accuracy. 
+**MapStories** is an application for viewing and sharing information with geographical location. It allows users to add pins to the map that represent personal memories, reported incidents, community events, lost/found items, and much more. MapStories uses Gemini to match corresponding 'Lost' and 'Found' pins. You may use the Gemini API, or, alternatively, the system will use regular expressions to establish matches. Please note that the alternative matching method has worse accuracy. 
 
 Requisites 
 -----
@@ -22,7 +22,10 @@ mvn compile
 Usage
 -----
 
-_developers' version_
+- To run the application, use the following snippet. It will launch the server on `localhost`, port `7070`.
+  ```bash
+  mvn compile exec:java
+  ```
 
 - To conduct the `surefire` tests, use:
 
@@ -30,8 +33,5 @@ _developers' version_
   mvn test
   ```
 
-- To run the application, use the following snippet. It will launch the server on `localhost`, port `7070`.
-  ```bash
-  mvn compile exec:java
-  ```
+
 
